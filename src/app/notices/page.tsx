@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site/site-header";
 import { DocumentDirectory } from "@/features/notices/components/document-directory";
 import { SchoolContentProvider } from "@/features/school/lib/content-store";
 import { getSchoolContent } from "@/features/school/server/site-content-repository";
+import { formatLongDate } from "@/lib/format";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import { buildWebPageSchema } from "@/lib/seo/structured-data";
 
@@ -19,11 +20,7 @@ export default async function NoticesPage() {
     .toSorted((first, second) => second.date.localeCompare(first.date))[0]
     ?.date;
   const lastUpdated = latestDocumentDate
-    ? new Intl.DateTimeFormat("en-GB", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      }).format(new Date(`${latestDocumentDate}T00:00:00`))
+    ? formatLongDate(latestDocumentDate, "numeric")
     : "No publications yet";
 
   return (

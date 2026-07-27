@@ -11,6 +11,7 @@ import {
   GoogleDriveConfigurationError,
   uploadAssetToGoogleDrive,
 } from "@/features/storage/server/google-drive-storage";
+import { getErrorMessage } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
@@ -110,7 +111,7 @@ export async function POST(request: Request) {
         : "The file could not be uploaded to Google Drive.";
     console.error(
       "Google Drive upload failed:",
-      error instanceof Error ? error.message : "Unknown error",
+      getErrorMessage(error),
     );
     return NextResponse.json(
       { ok: false, message },

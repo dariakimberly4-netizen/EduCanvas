@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { requireAdmin } from "@/features/auth/server/require-admin";
 import { recordAuthenticationActivity } from "@/features/school/server/activity-repository";
+import { getErrorMessage } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error(
       "Sign-out activity could not be recorded:",
-      error instanceof Error ? error.message : "Unknown error",
+      getErrorMessage(error),
     );
     return NextResponse.json(
       { ok: false, message: "The sign-out activity could not be recorded." },

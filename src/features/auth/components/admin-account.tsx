@@ -5,26 +5,10 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ConfirmationDialog } from "@/components/admin/confirmation-dialog";
 import type { AdminUser } from "@/features/auth/domain/admin-user";
 import { authClient } from "@/lib/auth-client";
-
-function getInitials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase();
-}
+import { getInitials } from "@/lib/format";
 
 export function AdminAccount({ user }: { user: AdminUser }) {
   const router = useRouter();
@@ -83,46 +67,19 @@ export function AdminAccount({ user }: { user: AdminUser }) {
         </button>
       </div>
 
-      <Dialog
+      <ConfirmationDialog
         open={confirmationOpen}
         onOpenChange={(open) => {
           if (!isPending) setConfirmationOpen(open);
         }}
-      >
-        <DialogContent
-          className="admin-dialog confirm-dialog !max-w-[440px] !gap-0 !rounded-[7px] !p-0"
-          showCloseButton={false}
-        >
-          <div className="confirm-dialog-inner">
-            <span className="warning-icon" aria-hidden="true">
-              <LogOut size={18} />
-            </span>
-            <DialogTitle>Sign out of EduCanvas?</DialogTitle>
-            <DialogDescription>
-              You will need to sign in with Google again to manage the website.
-            </DialogDescription>
-            <div className="dialog-actions">
-              <DialogClose asChild>
-                <Button
-                  className="button button-secondary"
-                  disabled={isPending}
-                  type="button"
-                >
-                  Cancel
-                </Button>
-              </DialogClose>
-              <Button
-                className="button button-danger"
-                disabled={isPending}
-                onClick={() => void signOut()}
-                type="button"
-              >
-                {isPending ? "Signing out…" : "Sign out"}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+        title="Sign out of EduCanvas?"
+        description="You will need to sign in with Google again to manage the website."
+        confirmLabel="Sign out"
+        pendingLabel="Signing out…"
+        isPending={isPending}
+        icon={<LogOut size={18} />}
+        onConfirm={signOut}
+      />
     </>
   );
 }

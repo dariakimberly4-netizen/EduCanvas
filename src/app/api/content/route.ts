@@ -9,6 +9,7 @@ import {
 } from "@/features/school/server/site-content-repository";
 import { deleteUnreferencedContentAssets } from "@/features/storage/server/content-asset-cleanup";
 import { MongoConfigurationError } from "@/lib/mongodb";
+import { getErrorMessage } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -77,7 +78,7 @@ export async function PUT(request: Request) {
 
     console.error(
       "Website content persistence failed:",
-      error instanceof Error ? error.message : "Unknown error",
+      getErrorMessage(error),
     );
     return NextResponse.json(
       { ok: false, message: "The website changes could not be saved." },

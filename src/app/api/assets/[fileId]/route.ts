@@ -4,6 +4,7 @@ import {
   downloadAssetFromGoogleDrive,
   GoogleDriveAssetNotFoundError,
 } from "@/features/storage/server/google-drive-storage";
+import { getErrorMessage } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -77,7 +78,7 @@ export async function GET(
 
     console.error(
       "Google Drive asset delivery failed:",
-      error instanceof Error ? error.message : "Unknown error",
+      getErrorMessage(error),
     );
     return NextResponse.json(
       { ok: false, message: "The requested asset is temporarily unavailable." },

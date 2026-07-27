@@ -7,6 +7,7 @@ import {
   AdmissionEmailConfigurationError,
   sendAdmissionEnquiry,
 } from "@/features/admissions/server/send-admission-enquiry";
+import { getErrorMessage } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
@@ -76,7 +77,7 @@ export async function POST(request: Request) {
 
     console.error(
       "Admission email delivery failed:",
-      error instanceof Error ? error.message : "Unknown error",
+      getErrorMessage(error),
     );
     return NextResponse.json(
       {

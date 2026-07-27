@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import type { DocumentType, SchoolDocument } from "@/features/school/domain/types";
 import { useSchoolContent } from "@/features/school/lib/content-store";
 import { resolveStoredAssetUrl } from "@/features/storage/domain/asset-url";
+import { getIsoDateParts } from "@/lib/format";
 
 const academicYears = [
   { value: "all", label: "All years" },
@@ -15,17 +16,8 @@ const academicYears = [
   { value: "2025", label: "2025–26" },
 ];
 
-function formatDate(value: string) {
-  const date = new Date(`${value}T00:00:00`);
-  return {
-    day: String(date.getDate()).padStart(2, "0"),
-    month: date.toLocaleString("en-GB", { month: "short" }),
-    year: date.getFullYear(),
-  };
-}
-
 function DocumentRow({ document, featured = false }: { document: SchoolDocument; featured?: boolean }) {
-  const date = formatDate(document.date);
+  const date = getIsoDateParts(document.date);
   return (
     <article className={`document${featured ? " featured" : ""}`}>
       <time dateTime={document.date}><strong>{date.day}</strong>{date.month} {date.year}</time>

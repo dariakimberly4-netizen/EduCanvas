@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import type { FacultyMember } from "@/features/school/domain/types";
 import { useSchoolContent } from "@/features/school/lib/content-store";
 import { resolveStoredAssetUrl } from "@/features/storage/domain/asset-url";
+import { getInitials } from "@/lib/format";
 
 type FacultyArea = "all" | "primary" | "science" | "humanities";
 
@@ -22,10 +23,6 @@ function getFacultyArea(profile: FacultyMember): Exclude<FacultyArea, "all"> {
   if (/humanities|languages|creative arts|social science/.test(searchable)) return "humanities";
   if (/science|physics|chemistry|biology|math/.test(searchable)) return "science";
   return "humanities";
-}
-
-function initials(name: string) {
-  return name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
 }
 
 export function FacultyDirectory() {
@@ -70,7 +67,7 @@ export function FacultyDirectory() {
                   unoptimized
                 />
               ) : (
-                <span>{initials(profile.name)}</span>
+                <span>{getInitials(profile.name)}</span>
               )}
             </div>
             <h2>{profile.name}</h2><p>{profile.role}</p><small>{profile.subject} · {profile.experience} years</small>

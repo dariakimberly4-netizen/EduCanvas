@@ -7,14 +7,7 @@ import type {
   SchoolContent,
   SchoolDocument,
 } from "@/features/school/domain/types";
-
-function activityDate() {
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(new Date());
-}
+import { formatShortDate } from "@/lib/format";
 
 function differs(first: unknown, second: unknown) {
   return JSON.stringify(first) !== JSON.stringify(second);
@@ -51,7 +44,7 @@ function collectionActivities<T extends { id: number }>(
 }
 
 function heroActivities(previous: HeroSlide[], next: HeroSlide[]) {
-  const date = activityDate();
+  const date = formatShortDate();
   const activities = collectionActivities(previous, next, {
     created: (slide) => ({ action: "Created carousel image", item: slide.heading, time: date }),
     edited: (slide) => ({ action: "Edited carousel image", item: slide.heading, time: date }),
@@ -75,7 +68,7 @@ function heroActivities(previous: HeroSlide[], next: HeroSlide[]) {
 }
 
 function facultyActivities(previous: FacultyMember[], next: FacultyMember[]) {
-  const date = activityDate();
+  const date = formatShortDate();
   return collectionActivities(previous, next, {
     created: (member) => ({ action: "Created faculty profile", item: member.name, time: date }),
     edited: (member) => ({ action: "Edited faculty profile", item: member.name, time: date }),
@@ -87,7 +80,7 @@ function documentActivities(
   previous: SchoolDocument[],
   next: SchoolDocument[],
 ) {
-  const date = activityDate();
+  const date = formatShortDate();
   return collectionActivities(previous, next, {
     created: (document) => ({ action: `Created ${document.type.toLowerCase()}`, item: document.title, time: date }),
     edited: (document) => ({ action: `Edited ${document.type.toLowerCase()}`, item: document.title, time: date }),
@@ -105,7 +98,7 @@ export function withDerivedActivity(
     activities.push({
       action: "Edited landing page",
       item: "Homepage content",
-      time: activityDate(),
+      time: formatShortDate(),
     });
   }
 

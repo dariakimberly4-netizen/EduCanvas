@@ -5,6 +5,7 @@ import {
   GoogleDriveConfigurationError,
   deleteAssetFromGoogleDrive,
 } from "@/features/storage/server/google-drive-storage";
+import { getErrorMessage } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
@@ -40,7 +41,7 @@ export async function DELETE(
   } catch (error) {
     console.error(
       "Google Drive deletion failed:",
-      error instanceof Error ? error.message : "Unknown error",
+      getErrorMessage(error),
     );
     return NextResponse.json(
       {

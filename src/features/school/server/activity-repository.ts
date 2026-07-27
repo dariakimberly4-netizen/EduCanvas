@@ -4,16 +4,7 @@ import {
   getSchoolContent,
   saveSchoolContent,
 } from "@/features/school/server/site-content-repository";
-
-function activityTimestamp() {
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date());
-}
+import { formatDateTime } from "@/lib/format";
 
 export async function recordAuthenticationActivity({
   action,
@@ -33,7 +24,7 @@ export async function recordAuthenticationActivity({
         {
           action,
           item: `${name} · ${email}`,
-          time: activityTimestamp(),
+          time: formatDateTime(),
         },
         ...content.activity,
       ].slice(0, 8),

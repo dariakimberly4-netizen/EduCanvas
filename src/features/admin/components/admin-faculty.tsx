@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { FormEvent, useMemo, useState } from "react";
 
+import { ConfirmationDialog } from "@/components/admin/confirmation-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,27 +13,20 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import type { FacultyMember, PublicationStatus, SchoolContent } from "@/features/school/domain/types";
+import type { AdminContentEditorProps } from "@/features/admin/domain/admin-content-editor";
+import type { FacultyMember, PublicationStatus } from "@/features/school/domain/types";
 import { resolveStoredAssetUrl } from "@/features/storage/domain/asset-url";
 import {
-  deleteAsset,
+  deleteAssetQuietly,
   uploadAsset,
 } from "@/features/storage/lib/asset-client";
 import { useFilePreview } from "@/features/storage/lib/use-file-preview";
-
-interface AdminFacultyProps {
-  content: SchoolContent;
-  updateContent: (content: SchoolContent) => Promise<void>;
-  notify: (title: string, message: string) => void;
-}
+import { getInitials } from "@/lib/format";
+import { getErrorMessage } from "@/lib/utils";
 
 const departments = ["Leadership", "Primary", "Science", "Mathematics", "Languages", "Humanities", "Creative Arts"];
 
-function initials(name: string) {
-  return name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
-}
-
-export function AdminFaculty({ content, updateContent, notify }: AdminFacultyProps) {
+export function AdminFaculty({ content, updateContent, notify }: AdminContentEditorProps) {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"all" | PublicationStatus>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -97,10 +91,8 @@ export function AdminFaculty({ content, updateContent, notify }: AdminFacultyPro
       clearImagePreview();
       notify(editing ? "Profile updated" : "Profile added", `${profile.name} is ${profile.status.toLowerCase()} on the faculty page.`);
     } catch (error) {
-      if (uploadedFileId) {
-        await deleteAsset(uploadedFileId).catch(() => undefined);
-      }
-      notify("Profile save failed", error instanceof Error ? error.message : "The faculty profile could not be saved.");
+      await deleteAssetQuietly(uploadedFileId);
+      notify("Profile save failed", getErrorMessage(error, "The faculty profile could not be saved."));
     } finally {
       setIsUploadingImage(false);
     }
@@ -116,7 +108,7 @@ export function AdminFaculty({ content, updateContent, notify }: AdminFacultyPro
       notify("Profile removed", `${pendingDelete.name} was removed from the teaching team.`);
       setPendingDelete(null);
     } catch (error) {
-      notify("Profile removal failed", error instanceof Error ? error.message : "The faculty profile could not be removed.");
+      notify("Profile removal failed", getErrorMessage(error, "The faculty profile could not be removed."));
     }
   }
 
@@ -150,7 +142,7 @@ export function AdminFaculty({ content, updateContent, notify }: AdminFacultyPro
                       unoptimized
                     />
                   ) : (
-                    <span>{initials(profile.name)}</span>
+                    <span>{getInitials(profile.name)}</span>
                   )}
                 </div>
                 <div><strong>{profile.name}</strong><small>{profile.role} · {profile.subject}</small></div>
@@ -235,15 +227,14 @@ export function AdminFaculty({ content, updateContent, notify }: AdminFacultyPro
         </DialogContent>
       </Dialog>
 
-      <Dialog open={Boolean(pendingDelete)} onOpenChange={(open) => !open && setPendingDelete(null)}>
-        <DialogContent className="admin-dialog confirm-dialog !max-w-[440px] !gap-0 !rounded-[7px] !p-0" showCloseButton={false}>
-          <div className="confirm-dialog-inner">
-            <span className="warning-icon">!</span><DialogTitle>Remove this profile?</DialogTitle>
-            <DialogDescription>{pendingDelete?.name} will no longer appear on the faculty page. This action cannot be undone.</DialogDescription>
-            <div className="dialog-actions"><DialogClose asChild><Button className="button button-secondary" type="button">Cancel</Button></DialogClose><Button className="button button-danger" onClick={deleteProfile} type="button">Remove</Button></div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ConfirmationDialog
+        open={Boolean(pendingDelete)}
+        onOpenChange={(open) => !open && setPendingDelete(null)}
+        title="Remove this profile?"
+        description={<>{pendingDelete?.name} will no longer appear on the faculty page. This action cannot be undone.</>}
+        confirmLabel="Remove"
+        onConfirm={deleteProfile}
+      />
     </>
   );
 }

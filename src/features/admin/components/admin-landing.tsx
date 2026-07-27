@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { FormEvent, useMemo, useState } from "react";
 
+import { ConfirmationDialog } from "@/components/admin/confirmation-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,27 +14,18 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { AdminHomeContentFields } from "@/features/admin/components/admin-home-content-fields";
-import type { HeroSlide, SchoolContent } from "@/features/school/domain/types";
+import type { AdminContentEditorProps } from "@/features/admin/domain/admin-content-editor";
+import type { HeroSlide } from "@/features/school/domain/types";
 import { resolveStoredAssetUrl } from "@/features/storage/domain/asset-url";
 import {
-  deleteAsset,
+  deleteAssetQuietly,
   uploadAsset,
 } from "@/features/storage/lib/asset-client";
 import { useFilePreview } from "@/features/storage/lib/use-file-preview";
+import { formatDateTime } from "@/lib/format";
+import { getErrorMessage } from "@/lib/utils";
 
-interface AdminLandingProps {
-  content: SchoolContent;
-  updateContent: (content: SchoolContent) => Promise<void>;
-  notify: (title: string, message: string) => void;
-}
-
-function formatPublishedAt() {
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
-  }).format(new Date());
-}
-
-export function AdminLanding({ content, updateContent, notify }: AdminLandingProps) {
+export function AdminLanding({ content, updateContent, notify }: AdminContentEditorProps) {
   const [draft, setDraft] = useState(content.landing);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [mobilePreview, setMobilePreview] = useState(false);
@@ -54,7 +46,7 @@ export function AdminLanding({ content, updateContent, notify }: AdminLandingPro
   const dirty = changes.length > 0;
 
   async function publishLanding() {
-    const nextLanding = { ...draft, publishedAt: formatPublishedAt() };
+    const nextLanding = { ...draft, publishedAt: formatDateTime() };
     try {
       await updateContent({
         ...content,
@@ -64,7 +56,7 @@ export function AdminLanding({ content, updateContent, notify }: AdminLandingPro
       setReviewOpen(false);
       notify("Landing page published", "Your changes are now visible on the public website.");
     } catch (error) {
-      notify("Publishing failed", error instanceof Error ? error.message : "The landing page could not be saved.");
+      notify("Publishing failed", getErrorMessage(error, "The landing page could not be saved."));
     }
   }
 
@@ -82,7 +74,7 @@ export function AdminLanding({ content, updateContent, notify }: AdminLandingPro
     try {
       await updateSlides(slides, "The new slide order is visible on the home page.");
     } catch (error) {
-      notify("Carousel update failed", error instanceof Error ? error.message : "The slide order could not be saved.");
+      notify("Carousel update failed", getErrorMessage(error, "The slide order could not be saved."));
     }
   }
 
@@ -111,10 +103,8 @@ export function AdminLanding({ content, updateContent, notify }: AdminLandingPro
       form.reset();
       clearImagePreview();
     } catch (error) {
-      if (uploadedFileId) {
-        await deleteAsset(uploadedFileId).catch(() => undefined);
-      }
-      notify("Image upload failed", error instanceof Error ? error.message : "The carousel image could not be uploaded.");
+      await deleteAssetQuietly(uploadedFileId);
+      notify("Image upload failed", getErrorMessage(error, "The carousel image could not be uploaded."));
     } finally {
       setIsUploadingImage(false);
     }
@@ -130,7 +120,7 @@ export function AdminLanding({ content, updateContent, notify }: AdminLandingPro
       );
       setPendingSlideDelete(null);
     } catch (error) {
-      notify("Image removal failed", error instanceof Error ? error.message : "The carousel image could not be removed.");
+      notify("Image removal failed", getErrorMessage(error, "The carousel image could not be removed."));
     }
   }
 
@@ -233,39 +223,14 @@ export function AdminLanding({ content, updateContent, notify }: AdminLandingPro
         </DialogContent>
       </Dialog>
 
-      <Dialog
+      <ConfirmationDialog
         open={Boolean(pendingSlideDelete)}
         onOpenChange={(open) => !open && setPendingSlideDelete(null)}
-      >
-        <DialogContent
-          className="admin-dialog confirm-dialog !max-w-[440px] !gap-0 !rounded-[7px] !p-0"
-          showCloseButton={false}
-        >
-          <div className="confirm-dialog-inner">
-            <span className="warning-icon" aria-hidden="true">!</span>
-            <DialogTitle>Remove this carousel image?</DialogTitle>
-            <DialogDescription>
-              {pendingSlideDelete?.heading} will no longer appear on the
-              homepage, and its image will be deleted from Google Drive. This
-              action cannot be undone.
-            </DialogDescription>
-            <div className="dialog-actions">
-              <DialogClose asChild>
-                <Button className="button button-secondary" type="button">
-                  Cancel
-                </Button>
-              </DialogClose>
-              <Button
-                className="button button-danger"
-                onClick={() => void removeSlide()}
-                type="button"
-              >
-                Remove
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+        title="Remove this carousel image?"
+        description={<>{pendingSlideDelete?.heading} will no longer appear on the homepage, and its image will be deleted from Google Drive. This action cannot be undone.</>}
+        confirmLabel="Remove"
+        onConfirm={removeSlide}
+      />
     </>
   );
 }

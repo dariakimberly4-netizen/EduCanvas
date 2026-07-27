@@ -40,3 +40,8 @@ export async function deleteAsset(fileId: string) {
     throw new Error(result.message ?? "The stored file could not be deleted.");
   }
 }
+
+export async function deleteAssetQuietly(fileId?: string) {
+  if (!fileId) return;
+  await deleteAsset(fileId).catch(() => undefined);
+}

@@ -9,6 +9,7 @@ import { SchoolStory } from "@/features/home/components/school-story";
 import { SchoolContentProvider } from "@/features/school/lib/content-store";
 import { getSchoolContent } from "@/features/school/server/site-content-repository";
 import { generatePageMetadata } from "@/lib/seo/metadata";
+import { getIsoDateParts } from "@/lib/format";
 import {
   buildEducationalOrganizationSchema,
   buildWebPageSchema,
@@ -27,11 +28,11 @@ export default async function HomePage() {
     .toSorted((first, second) => second.date.localeCompare(first.date))
     .slice(0, 3)
     .map((document) => {
-      const date = new Date(`${document.date}T00:00:00`);
+      const date = getIsoDateParts(document.date);
       return {
         date: document.date,
-        day: String(date.getDate()).padStart(2, "0"),
-        month: date.toLocaleString("en-GB", { month: "short" }),
+        day: date.day,
+        month: date.month,
         category:
           document.type === "Result" ? "Results" : document.category,
         title: document.title,
