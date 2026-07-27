@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -8,11 +7,9 @@ import {
   getAuthenticatedAdminUser,
   isAuthorizedAdmin,
 } from "@/features/auth/server/admin-access";
+import { generatePrivatePageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Staff login",
-  description: "Sign in to the Shapla Grove website management workspace.",
-};
+export const metadata = generatePrivatePageMetadata("Staff login");
 
 interface AdminLoginPageProps {
   searchParams: Promise<{ error?: string }>;

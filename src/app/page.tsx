@@ -1,10 +1,19 @@
 import Link from "next/link";
 
+import { StructuredData } from "@/components/seo/structured-data";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { AdmissionInquiry } from "@/features/home/components/admission-inquiry";
 import { HomeHero } from "@/features/home/components/home-hero";
 import { SchoolStory } from "@/features/home/components/school-story";
+import { generatePageMetadata } from "@/lib/seo/metadata";
+import {
+  buildEducationalOrganizationSchema,
+  buildWebPageSchema,
+  buildWebSiteSchema,
+} from "@/lib/seo/structured-data";
+
+export const metadata = generatePageMetadata("home");
 
 const tasks = [
   { number: "01", title: "Apply for admission", description: "Check eligibility, class availability, and request a campus visit.", action: "Start enquiry", href: "#admissions", primary: true },
@@ -29,6 +38,13 @@ const updates = [
 export default function HomePage() {
   return (
     <>
+      <StructuredData
+        data={[
+          buildWebSiteSchema(),
+          buildEducationalOrganizationSchema(),
+          buildWebPageSchema("home"),
+        ]}
+      />
       <SiteHeader active="home" />
       <main id="main">
         <HomeHero />

@@ -1,18 +1,18 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
+import { StructuredData } from "@/components/seo/structured-data";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { FacultyDirectory } from "@/features/faculty/components/faculty-directory";
+import { generatePageMetadata } from "@/lib/seo/metadata";
+import { buildWebPageSchema } from "@/lib/seo/structured-data";
 
-export const metadata: Metadata = {
-  title: "Our Faculty",
-  description: "Meet the leadership, subject specialists, and class teachers at Shapla Grove School & College.",
-};
+export const metadata = generatePageMetadata("faculty");
 
 export default function FacultyPage() {
   return (
     <div className="faculty-page">
+      <StructuredData data={buildWebPageSchema("faculty")} />
       <SiteHeader active="faculty" />
       <main id="main">
         <section className="page-hero">

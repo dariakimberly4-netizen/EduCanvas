@@ -25,6 +25,7 @@ Schools, madrashas, and coaching centres share the same routes and features whil
 - Tailwind CSS 4
 - shadcn/ui and Radix primitives
 - Better Auth with Google OAuth
+- Resend for admission-enquiry email delivery
 - Playwright end-to-end testing
 - pnpm
 
@@ -62,11 +63,16 @@ Open [http://localhost:3000](http://localhost:3000).
 | Variable | Required | Description |
 | --- | --- | --- |
 | `SITE_THEME` | No | `school`, `madrasha`, or `coaching`; defaults to `school` |
+| `SITE_URL` | Production | Public origin used for canonical, sitemap, and social-preview URLs |
 | `BETTER_AUTH_SECRET` | Yes | Random secret containing at least 32 characters |
 | `BETTER_AUTH_URL` | Yes | Application origin, such as `http://localhost:3000` |
 | `GOOGLE_CLIENT_ID` | Yes | Google OAuth web-client ID |
 | `GOOGLE_CLIENT_SECRET` | Yes | Google OAuth web-client secret |
+| `GOOGLE_SITE_VERIFICATION` | No | Google Search Console verification token |
 | `ADMIN_EMAILS` | No | Comma-separated administrator email allowlist |
+| `RESEND_API_KEY` | Admissions | Server-only API key created in Resend |
+| `RESEND_FROM_EMAIL` | Admissions | Sender using a domain verified in Resend, including an optional display name |
+| `ADMISSION_ADMIN_EMAIL` | Admissions | Administrator inbox that receives admission enquiries |
 
 Never commit `.env.local` or production credentials. The repository includes only a safe `.env.example`.
 
@@ -89,6 +95,27 @@ The archived coaching prototype directory retains its original `prototypes/coaci
 Theme resolution is centralized in `src/config/site-theme.ts`. The root layout renders a `data-theme` attribute before the page reaches the browser, preventing a flash of the default theme. `src/app/themes.css` contains isolated theme overrides while routes, components, authentication, and workflows stay shared.
 
 Restart the development server after changing the theme. Production deployments must be rebuilt.
+
+## SEO and social previews
+
+EduCanvas generates search and sharing metadata from a centralized configuration:
+
+- Canonical URLs and page-specific titles, descriptions, and keywords
+- Open Graph and Twitter large-image cards
+- A theme-aware 1200×630 social preview image
+- `robots.txt` with admin and API exclusions
+- `sitemap.xml` for public routes
+- A web app manifest and theme color
+- `WebSite`, `EducationalOrganization`, `School`, and `WebPage` JSON-LD
+- Explicit `noindex` rules for the admin workspace and login
+
+Set the deployed public origin before building:
+
+```dotenv
+SITE_URL=https://your-domain.example
+```
+
+When `SITE_URL` is absent, EduCanvas falls back to `BETTER_AUTH_URL`, then to `http://localhost:3000`. Search engines must never receive a production build containing a localhost origin.
 
 ## Google authentication
 
@@ -114,6 +141,29 @@ Restart the development server after changing the theme. Production deployments 
 
 When `ADMIN_EMAILS` is empty, any successfully authenticated Google account can access the admin workspace. Better Auth validates sessions on the server and stores stateless session data in encrypted cookies.
 
+## Admission enquiry email
+
+The landing-page admission form validates submissions on the server and sends
+the parent or guardian name, phone number, selected class level, and submission
+time to the configured administrator through Resend.
+
+1. Create a Resend account and API key.
+2. Add and verify the domain that will send the messages.
+3. Configure the server-only values in `.env.local`:
+
+   ```dotenv
+   RESEND_API_KEY=re_your_api_key
+   RESEND_FROM_EMAIL=Shapla Grove Admissions <admissions@example.edu>
+   ADMISSION_ADMIN_EMAIL=admissions@example.edu
+   ```
+
+4. Restart the development server.
+
+The sender address must belong to the verified domain. Never prefix these
+variables with `NEXT_PUBLIC_`; the API key and delivery configuration stay on
+the server. The form shows a confirmation only after Resend accepts the email,
+and shows a recoverable error if delivery cannot be started.
+
 ## Project structure
 
 ```text
@@ -125,6 +175,7 @@ src/
   config/                 Typed theme configuration
   features/
     admin/                Content-management workspace
+    admissions/           Enquiry validation, email template, and Resend delivery
     auth/                 Authentication UI, access rules, and user types
     faculty/              Faculty directory
     home/                 Landing-page sections and inquiry form

@@ -1,18 +1,18 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
+import { StructuredData } from "@/components/seo/structured-data";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { DocumentDirectory } from "@/features/notices/components/document-directory";
+import { generatePageMetadata } from "@/lib/seo/metadata";
+import { buildWebPageSchema } from "@/lib/seo/structured-data";
 
-export const metadata: Metadata = {
-  title: "Notices & Results",
-  description: "Find official notices, examination schedules, parent updates, and verified results from Shapla Grove School & College.",
-};
+export const metadata = generatePageMetadata("notices");
 
 export default function NoticesPage() {
   return (
     <div className="notices-page">
+      <StructuredData data={buildWebPageSchema("notices")} />
       <SiteHeader active="notices" />
       <main id="main">
         <section className="page-hero compact">

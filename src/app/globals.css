@@ -215,6 +215,10 @@ button, select { cursor: pointer; }
 input, select { width: 100%; min-height: 48px; padding: 10px 12px; border: 1px solid #bcccdc; border-radius: 4px; background: var(--white); color: var(--text); }
 input::placeholder { color: #829ab1; }
 .inquiry-form small { color: var(--muted); font-size: 10px; }
+.inquiry-form button:disabled { cursor: wait; opacity: .7; }
+.form-status { min-height: 15px; line-height: 1.5; }
+.form-status.error { color: #a61b1b; font-weight: 700; }
+.form-honeypot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 
 .site-footer { padding: 68px 0 28px; background: var(--ink-deep); color: #d6e5ee; }
 .footer-grid { display: grid; grid-template-columns: 1.5fr .7fr .7fr 1fr; gap: 60px; }

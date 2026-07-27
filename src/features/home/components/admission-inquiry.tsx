@@ -5,13 +5,63 @@ import { FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export function AdmissionInquiry() {
-  const [sent, setSent] = useState(false);
+type SubmissionState = "idle" | "submitting" | "success" | "error";
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+interface AdmissionApiResponse {
+  ok: boolean;
+  message?: string;
+}
+
+export function AdmissionInquiry() {
+  const [submissionState, setSubmissionState] =
+    useState<SubmissionState>("idle");
+  const [statusMessage, setStatusMessage] = useState(
+    "By continuing, you agree that our admissions office may contact you about this enquiry.",
+  );
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSent(true);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    setSubmissionState("submitting");
+    setStatusMessage("Sending your enquiry securely…");
+
+    try {
+      const response = await fetch("/api/admission-enquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          guardianName: formData.get("guardianName"),
+          phone: formData.get("phone"),
+          classLevel: formData.get("classLevel"),
+          website: formData.get("website"),
+        }),
+      });
+      const result = (await response.json()) as AdmissionApiResponse;
+
+      if (!response.ok || !result.ok) {
+        throw new Error(
+          result.message ?? "We could not send your enquiry. Please try again.",
+        );
+      }
+
+      form.reset();
+      setSubmissionState("success");
+      setStatusMessage(
+        "Our admissions office will contact you within one school day.",
+      );
+    } catch (error) {
+      setSubmissionState("error");
+      setStatusMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not send your enquiry. Please try again.",
+      );
+    }
   }
+
+  const isSubmitting = submissionState === "submitting";
 
   return (
     <section className="admissions-section" id="admissions">
@@ -24,16 +74,34 @@ export function AdmissionInquiry() {
         </div>
         <form className="inquiry-form" onSubmit={handleSubmit}>
           <div className="form-heading"><h3>Request admission information</h3><p>Fields marked * are required.</p></div>
-          <label>Parent or guardian name *<Input name="name" required placeholder="Enter your full name" /></label>
-          <label>Phone number *<Input name="phone" type="tel" required placeholder="+880 1XXX XXXXXX" /></label>
+          <label>Parent or guardian name *<Input name="guardianName" required minLength={2} maxLength={80} autoComplete="name" placeholder="Enter your full name" /></label>
+          <label>Phone number *<Input name="phone" type="tel" required minLength={8} maxLength={25} autoComplete="tel" placeholder="+880 1XXX XXXXXX" /></label>
           <label>Class you are interested in *
             <select name="classLevel" required defaultValue="">
               <option value="" disabled>Select a class level</option>
               <option>Playgroup–KG</option><option>Classes I–V</option><option>Classes VI–X</option><option>Classes XI–XII</option>
             </select>
           </label>
-          <Button className="button button-primary" type="submit">{sent ? "Enquiry received" : "Request a call from admissions"}</Button>
-          <small>{sent ? "Our admissions office will contact you within one school day." : "By continuing, you agree that our admissions office may contact you about this enquiry."}</small>
+          <div className="form-honeypot" aria-hidden="true">
+            <label>
+              Website
+              <Input name="website" tabIndex={-1} autoComplete="off" />
+            </label>
+          </div>
+          <Button className="button button-primary" type="submit" disabled={isSubmitting}>
+            {submissionState === "success"
+              ? "Enquiry received"
+              : isSubmitting
+                ? "Sending enquiry…"
+                : "Request a call from admissions"}
+          </Button>
+          <small
+            className={submissionState === "error" ? "form-status error" : "form-status"}
+            role={submissionState === "error" ? "alert" : "status"}
+            aria-live="polite"
+          >
+            {statusMessage}
+          </small>
         </form>
       </div>
     </section>

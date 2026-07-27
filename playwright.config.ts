@@ -23,7 +23,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "E2E_AUTH_BYPASS_TOKEN=playwright-admin-session-token-2026 BETTER_AUTH_SECRET=playwright-only-secret-at-least-32-characters BETTER_AUTH_URL=http://127.0.0.1:3101 GOOGLE_CLIENT_ID=playwright-client GOOGLE_CLIENT_SECRET=playwright-secret pnpm exec next start -p 3101",
+    command: "E2E_AUTH_BYPASS_TOKEN=playwright-admin-session-token-2026 E2E_EMAIL_BYPASS_TOKEN=playwright-email-delivery-token-2026 BETTER_AUTH_SECRET=playwright-only-secret-at-least-32-characters BETTER_AUTH_URL=http://127.0.0.1:3101 GOOGLE_CLIENT_ID=playwright-client GOOGLE_CLIENT_SECRET=playwright-secret pnpm exec next start -p 3101",
     url: "http://127.0.0.1:3101",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { AdminDashboard } from "@/features/admin/components/admin-dashboard";
@@ -6,11 +5,9 @@ import {
   getAuthenticatedAdminUser,
   isAuthorizedAdmin,
 } from "@/features/auth/server/admin-access";
+import { generatePrivatePageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Website management",
-  description: "Manage Shapla Grove School website content, faculty, notices, and results.",
-};
+export const metadata = generatePrivatePageMetadata("Website management");
 
 export default async function AdminPage() {
   const user = await getAuthenticatedAdminUser();
