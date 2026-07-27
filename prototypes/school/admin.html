@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Manage Shapla Grove School website content, faculty, notices and results.">
+  <title>Website management | Shapla Grove School</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="admin-body">
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <a class="brand brand-light" href="index.html">
+      <span class="brand-mark">শ</span>
+      <span><strong>Shapla Grove</strong><small>Website management</small></span>
+    </a>
+    <nav aria-label="Admin navigation">
+      <p>Workspace</p>
+      <a class="active" href="#overview" data-admin-nav="overview"><span>⌂</span>Overview</a>
+      <a href="#landing" data-admin-nav="landing"><span>✎</span>Landing page</a>
+      <a href="#faculty" data-admin-nav="faculty"><span>♙</span>Faculty profiles</a>
+      <a href="#documents" data-admin-nav="documents"><span>□</span>Notices & results</a>
+    </nav>
+    <div class="sidebar-help"><strong>Prototype mode</strong><p>Changes are saved in this browser. No live database is connected.</p><button id="reset-demo" type="button">Reset demo data</button></div>
+    <a class="back-site" href="index.html" target="_blank">↗ View public website</a>
+  </aside>
+  <div class="admin-sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <main class="admin-main">
+    <header class="admin-topbar">
+      <button class="mobile-admin-menu" id="mobile-admin-menu" aria-label="Open admin menu">☰</button>
+      <div><p id="page-kicker">School website</p><h1 id="page-title">Manage your school website</h1></div>
+      <div class="admin-top-actions">
+        <span class="save-state" id="save-state"><i></i>All changes saved</span>
+        <a class="preview-site" href="index.html" target="_blank">Preview website ↗</a>
+        <div class="admin-user"><span>AR</span><p><strong>Admin Rahman</strong><small>Administrator</small></p></div>
+      </div>
+    </header>
+
+    <section class="admin-view active" data-admin-panel="overview" aria-labelledby="overview-title">
+      <div class="admin-welcome">
+        <div><p class="overline">Website overview</p><h2 id="overview-title">Everything families see, managed in one place.</h2><p>Update the school landing page, maintain faculty profiles, and publish notice or result PDFs. Published changes appear on the public prototype immediately.</p></div>
+        <a class="button button-secondary" href="index.html" target="_blank">Preview public website</a>
+      </div>
+
+      <div class="workflow-note">
+        <span>How publishing works</span>
+        <ol><li><b>1</b>Edit content</li><li><b>2</b>Review the preview</li><li><b>3</b>Publish to the website</li></ol>
+      </div>
+
+      <section class="admin-actions" aria-labelledby="manage-title">
+        <div class="admin-section-title"><div><p class="overline">Website areas</p><h2 id="manage-title">What do you want to manage?</h2></div><p>Choose an area to begin.</p></div>
+        <div class="management-grid">
+          <button type="button" data-open-view="landing"><span>Landing page</span><h3>School information</h3><p>Hero message, admissions information, mission, and contact details.</p><strong>Edit landing page →</strong></button>
+          <button type="button" data-open-view="faculty"><span>Faculty</span><h3>Teacher profiles</h3><p>Add or update names, roles, subjects, experience, and profile status.</p><strong>Manage <i data-faculty-count>8</i> profiles →</strong></button>
+          <button type="button" data-open-view="documents" data-doc-type="Notice"><span>Notices</span><h3>School notices</h3><p>Publish examination, holiday, event, and parent notice PDFs.</p><strong>Publish a notice →</strong></button>
+          <button type="button" data-open-view="documents" data-doc-type="Result"><span>Results</span><h3>Student results</h3><p>Publish verified term, model test, SSC, and HSC result PDFs.</p><strong>Publish results →</strong></button>
+        </div>
+      </section>
+
+      <section class="admin-health">
+        <div class="admin-section-title"><div><p class="overline">Website status</p><h2>Published content</h2></div><p id="last-published">Last published today</p></div>
+        <div class="admin-summary">
+          <article><span>Notices</span><strong data-notice-count>4</strong><small><i></i> Published documents</small></article>
+          <article><span>Faculty profiles</span><strong data-faculty-count>8</strong><small><i></i> Published profiles</small></article>
+          <article><span>Result documents</span><strong data-result-count>3</strong><small><i></i> Published documents</small></article>
+          <article><span>Landing page</span><strong class="text-status" id="landing-status">Up to date</strong><small><i></i> Public website</small></article>
+        </div>
+      </section>
+
+      <section class="activity-panel">
+        <div class="admin-section-title"><div><p class="overline">Recent activity</p><h2>Latest website changes</h2></div></div>
+        <div class="activity-list" id="activity-list"></div>
+      </section>
+    </section>
+
+    <section class="admin-view" data-admin-panel="landing" aria-labelledby="landing-title">
+      <div class="workspace-heading">
+        <div><p class="overline">Landing page</p><h2 id="landing-title">Edit school information</h2><p>Update the main information prospective families see when they visit the website.</p></div>
+        <span class="publish-badge"><i></i>Currently published</span>
+      </div>
+
+      <ol class="stepper" aria-label="Publishing steps">
+        <li class="active" data-step-indicator="edit"><span>1</span><div><b>Edit content</b><small>Update the fields below</small></div></li>
+        <li data-step-indicator="review"><span>2</span><div><b>Review changes</b><small>Check the live preview</small></div></li>
+        <li data-step-indicator="publish"><span>3</span><div><b>Publish</b><small>Make changes public</small></div></li>
+      </ol>
+
+      <div class="editor-layout">
+        <form class="content-editor" id="landing-form">
+          <div class="editor-section">
+            <div class="editor-section-heading"><span>Hero section</span><p>The first information families see.</p></div>
+            <label>Admission status<input name="admissionStatus" maxlength="60" required></label>
+            <label>School description line<input name="schoolDescriptor" maxlength="90" required></label>
+            <label>Main heading<textarea name="heroTitle" rows="3" maxlength="100" required></textarea><small><b data-counter="heroTitle">0</b>/100 characters</small></label>
+            <label>Introduction<textarea name="heroSummary" rows="4" maxlength="240" required></textarea><small><b data-counter="heroSummary">0</b>/240 characters</small></label>
+          </div>
+          <div class="editor-section">
+            <div class="editor-section-heading"><span>Admissions contact</span><p>How families contact the school.</p></div>
+            <div class="form-grid-two">
+              <label>Phone number<input name="phone" type="tel" required></label>
+              <label>Admission year<input name="admissionYear" required></label>
+            </div>
+          </div>
+          <div class="editor-section">
+            <div class="editor-section-heading"><span>School story</span><p>Your positioning on the public page.</p></div>
+            <label>Section heading<input name="schoolHeading" maxlength="90" required></label>
+            <label>School introduction<textarea name="schoolIntro" rows="5" maxlength="360" required></textarea></label>
+          </div>
+          <div class="editor-actions">
+            <span id="landing-unsaved">No unpublished changes</span>
+            <button class="button button-secondary" id="discard-landing" type="button">Discard changes</button>
+            <button class="button button-primary" type="submit">Review changes</button>
+          </div>
+        </form>
+
+        <aside class="live-preview">
+          <div class="preview-toolbar"><div><span></span><span></span><span></span></div><b>Live preview</b><button id="preview-size" type="button">Mobile view</button></div>
+          <div class="preview-frame" id="landing-preview">
+            <div class="mini-nav"><b>Shapla Grove</b><span>Admissions</span></div>
+            <div class="mini-hero">
+              <small id="preview-status">Admissions open</small>
+              <p id="preview-descriptor">English-version national curriculum</p>
+              <h3 id="preview-title">A complete education from Playgroup to Class XII.</h3>
+              <p id="preview-summary">A caring school where students progress with confidence.</p>
+              <button type="button">Start an admission enquiry</button>
+            </div>
+          </div>
+          <p class="preview-help">This preview updates as you type. Use “Review changes” before publishing.</p>
+        </aside>
+      </div>
+
+      <section class="carousel-manager" aria-labelledby="carousel-manager-title">
+        <div class="carousel-manager-heading">
+          <div><p class="overline">Hero carousel</p><h2 id="carousel-manager-title">Manage carousel images</h2><p>Images appear in this order on the Home page. Add up to six landscape images.</p></div>
+          <span><b id="slide-count">1</b>/6 images</span>
+        </div>
+        <div class="carousel-admin-layout">
+          <div class="slide-manager-list" id="slide-manager-list"></div>
+          <form class="slide-upload-form" id="slide-upload-form">
+            <div><h3>Add a carousel image</h3><p>The image is resized for the prototype before it is saved.</p></div>
+            <label class="image-drop" id="carousel-image-drop">
+              <input name="image" type="file" accept="image/jpeg,image/png,image/webp" required>
+              <span>＋</span><strong>Choose a landscape image</strong><small id="carousel-file-name">JPG, PNG or WebP · Maximum 8 MB</small>
+              <img id="carousel-upload-preview" alt="" hidden>
+            </label>
+            <label>Slide heading *<input name="heading" maxlength="70" placeholder="Example: Learning beyond the classroom" required></label>
+            <label>Supporting line<input name="supporting" maxlength="100" placeholder="Example: Clubs · Sport · Creative arts"></label>
+            <label>Image description *<textarea name="alt" rows="3" maxlength="160" placeholder="Describe what is visible for screen-reader users" required></textarea></label>
+            <button class="button button-primary" type="submit">Add image to carousel</button>
+          </form>
+        </div>
+      </section>
+    </section>
+
+    <section class="admin-view" data-admin-panel="faculty" aria-labelledby="faculty-title">
+      <div class="workspace-heading workspace-heading-actions">
+        <div><p class="overline">Faculty profiles</p><h2 id="faculty-title">Manage the teaching team</h2><p>Add, update, reorder, publish, or remove profiles shown on the Faculty page.</p></div>
+        <button class="button button-primary" id="add-faculty" type="button">+ Add faculty member</button>
+      </div>
+
+      <div class="manager-toolbar">
+        <label class="manager-search"><span>⌕</span><input id="faculty-search" type="search" placeholder="Search by name, role, or subject"></label>
+        <label>Status<select id="faculty-filter"><option value="all">All profiles</option><option value="Published">Published</option><option value="Draft">Draft</option></select></label>
+        <p><strong id="faculty-visible-count">8</strong> profiles shown</p>
+      </div>
+
+      <div class="data-panel">
+        <div class="faculty-manager-head"><span>Faculty member</span><span>Department</span><span>Experience</span><span>Status</span><span>Actions</span></div>
+        <div id="faculty-manager-list"></div>
+      </div>
+      <div class="empty-state" id="faculty-empty" hidden><span>⌕</span><h3>No matching profiles</h3><p>Try a different search term or status filter.</p></div>
+    </section>
+
+    <section class="admin-view" data-admin-panel="documents" aria-labelledby="documents-title">
+      <div class="workspace-heading workspace-heading-actions">
+        <div><p class="overline">Notices & results</p><h2 id="documents-title">Publish school documents</h2><p>Upload official PDFs and control what families can download from the public website.</p></div>
+        <button class="button button-primary" id="open-upload" type="button">+ Upload PDF</button>
+      </div>
+
+      <div class="document-workflow">
+        <div class="document-manager">
+          <div class="manager-toolbar">
+            <div class="segmented" role="tablist"><button class="active" type="button" data-document-filter="All">All</button><button type="button" data-document-filter="Notice">Notices</button><button type="button" data-document-filter="Result">Results</button></div>
+            <label class="manager-search"><span>⌕</span><input id="document-search" type="search" placeholder="Search documents"></label>
+          </div>
+          <div class="data-panel">
+            <div class="document-manager-head"><span>Document</span><span>Type</span><span>Published</span><span>Status</span><span>Actions</span></div>
+            <div id="document-manager-list"></div>
+          </div>
+          <div class="empty-state" id="document-empty" hidden><span>□</span><h3>No documents found</h3><p>Change the filter or upload a new PDF.</p></div>
+        </div>
+
+        <aside class="upload-drawer" id="upload-drawer" aria-labelledby="upload-title">
+          <div class="drawer-heading"><div><p class="overline">New document</p><h2 id="upload-title">Upload and publish</h2></div><button id="close-upload" type="button" aria-label="Close uploader">×</button></div>
+          <ol class="upload-progress"><li class="active">Details</li><li>File</li><li>Confirm</li></ol>
+          <form id="document-form">
+            <input type="hidden" name="documentId">
+            <label>Document type *<select name="type" required><option value="Notice">Notice</option><option value="Result">Result</option></select></label>
+            <label>Public title *<input name="title" maxlength="120" placeholder="Example: Half-yearly exam schedule" required></label>
+            <label>Category *<select name="category" required><option>Examination</option><option>General</option><option>Event</option><option>Parents</option><option>Academic result</option></select></label>
+            <label>Publish date *<input name="date" type="date" required></label>
+            <label class="file-drop" id="admin-file-drop"><input name="file" type="file" accept=".pdf"><span>↑</span><strong>Choose a PDF file</strong><small id="selected-file">PDF only · Maximum 10 MB</small></label>
+            <label class="confirmation"><input name="approved" type="checkbox" required> I checked this document and it is approved for publication.</label>
+            <div class="drawer-actions"><button class="button button-secondary" id="cancel-upload" type="button">Cancel</button><button class="button button-primary" type="submit">Publish document</button></div>
+          </form>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <dialog class="admin-dialog" id="faculty-dialog">
+    <form method="dialog" id="faculty-form">
+      <div class="dialog-heading"><div><p class="overline">Faculty profile</p><h2 id="faculty-dialog-title">Add faculty member</h2></div><button value="cancel" aria-label="Close dialog">×</button></div>
+      <input type="hidden" name="facultyId">
+      <div class="faculty-form-grid">
+        <label>Full name *<input name="name" required placeholder="Enter the teacher's name"></label>
+        <label>Role *<input name="role" required placeholder="Example: Senior Teacher"></label>
+        <label>Department *<select name="department" required><option>Leadership</option><option>Primary</option><option>Science</option><option>Mathematics</option><option>Languages</option><option>Humanities</option><option>Creative Arts</option></select></label>
+        <label>Subject or specialty *<input name="subject" required placeholder="Example: Physics"></label>
+        <label>Years of experience *<input name="experience" type="number" min="0" max="50" required></label>
+        <label>Profile status *<select name="status"><option>Published</option><option>Draft</option></select></label>
+        <label class="full-field">Short biography<textarea name="bio" rows="4" maxlength="260" placeholder="A concise introduction for families"></textarea></label>
+      </div>
+      <div class="dialog-actions"><button class="button button-secondary" value="cancel">Cancel</button><button class="button button-primary" id="save-faculty" type="submit">Save profile</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="admin-dialog confirm-dialog" id="confirm-dialog">
+    <form method="dialog">
+      <span class="warning-icon">!</span>
+      <h2 id="confirm-title">Remove this item?</h2>
+      <p id="confirm-message">This action cannot be undone.</p>
+      <div class="dialog-actions"><button class="button button-secondary" value="cancel">Cancel</button><button class="button button-danger" id="confirm-action" value="confirm">Remove</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="review-dialog admin-dialog" id="review-dialog">
+    <form method="dialog">
+      <div class="dialog-heading"><div><p class="overline">Review changes</p><h2>Publish landing-page updates?</h2></div><button value="cancel" aria-label="Close review">×</button></div>
+      <div class="change-summary" id="change-summary"></div>
+      <p class="review-note">Publishing will replace the current landing-page content and make these changes visible on the public prototype.</p>
+      <div class="dialog-actions"><button class="button button-secondary" value="cancel">Continue editing</button><button class="button button-primary" id="publish-landing" value="publish">Publish changes</button></div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"><span>✓</span><div><strong>Published</strong><p>Your changes are now visible.</p></div><button aria-label="Dismiss notification">×</button></div>
+  <script src="admin.js"></script>
+</body>
+</html>

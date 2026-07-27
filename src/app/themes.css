@@ -1,0 +1,256 @@
+/*
+ * SITE_THEME is applied by the root layout. Shared structure stays in
+ * globals.css; this file contains only visual overrides from the prototypes.
+ */
+
+html[data-theme="madrasha"] {
+  --background: #fffefa;
+  --foreground: #2f463f;
+  --card: #fffefa;
+  --card-foreground: #2f463f;
+  --popover: #fffefa;
+  --popover-foreground: #2f463f;
+  --primary: #176b51;
+  --primary-foreground: #fffefa;
+  --secondary: #e7f1eb;
+  --secondary-foreground: #173b32;
+  --accent: #e7f1eb;
+  --accent-foreground: #173b32;
+  --border: #d8dfd9;
+  --input: #b8c8bd;
+  --ring: #c79a3b;
+  --ink: #173b32;
+  --ink-deep: #0b2922;
+  --blue: #176b51;
+  --blue-dark: #0f503d;
+  --blue-pale: #e7f1eb;
+  --green: #28785d;
+  --gold: #c79a3b;
+  --white: #fffefa;
+  --surface: #f6f7f2;
+  --text: #2f463f;
+  --muted: #667a73;
+  --line: #d8dfd9;
+  --serif: "Newsreader", Georgia, serif;
+  --sans: "Manrope", Arial, sans-serif;
+  --arabic: "Noto Naskh Arabic", serif;
+  --shadow: 0 18px 45px rgba(11, 41, 34, .11);
+}
+
+html[data-theme="madrasha"] .utility-bar { color: #dce9e2; }
+html[data-theme="madrasha"] .brand-mark {
+  height: 48px;
+  position: relative;
+  border: 1px solid rgba(199, 154, 59, .75);
+  border-radius: 22px 22px 7px 7px;
+  background: var(--ink);
+  color: transparent;
+  font-size: 0;
+}
+html[data-theme="madrasha"] .brand-mark::after {
+  content: "ن";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #f3d895;
+  font: 600 25px var(--arabic);
+}
+html[data-theme="madrasha"] .brand-light .brand-mark {
+  border-color: rgba(199, 154, 59, .75);
+  background: var(--white);
+}
+html[data-theme="madrasha"] .brand-light .brand-mark::after { color: var(--blue); }
+html[data-theme="madrasha"] .home-hero { position: relative; isolation: isolate; }
+html[data-theme="madrasha"] .home-hero::before {
+  content: "";
+  width: 280px;
+  height: 280px;
+  position: absolute;
+  left: -85px;
+  bottom: -108px;
+  z-index: -1;
+  opacity: .3;
+  background-image:
+    linear-gradient(30deg, transparent 48%, rgba(23, 107, 81, .14) 49% 51%, transparent 52%),
+    linear-gradient(-30deg, transparent 48%, rgba(199, 154, 59, .13) 49% 51%, transparent 52%);
+  background-size: 32px 55px;
+  transform: rotate(15deg);
+  pointer-events: none;
+}
+html[data-theme="madrasha"] .home-hero .hero-content::before {
+  content: "رَبِّ زِدْنِي عِلْمًا";
+  width: max-content;
+  margin: 0 0 15px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(199, 154, 59, .55);
+  color: var(--blue);
+  font: 600 21px/1.4 var(--arabic);
+}
+html[data-theme="madrasha"] .status-pill { background: #e8f3eb; color: #185f49; }
+html[data-theme="madrasha"] .hero-summary { color: #526b62; font-size: 17px; line-height: 1.7; }
+html[data-theme="madrasha"] .hero-caption {
+  border-top: 2px solid rgba(199, 154, 59, .8);
+  background: rgba(11, 41, 34, .92);
+}
+html[data-theme="madrasha"] .school-rail dl div { border-color: #385c52; }
+html[data-theme="madrasha"] .task-icon {
+  height: 39px;
+  border-radius: 18px 18px 4px 4px;
+  color: #f3d895;
+  font-size: 10px;
+}
+html[data-theme="madrasha"] .principles article { border-color: #c7d9ce; }
+html[data-theme="madrasha"] .principles article > span {
+  height: 45px;
+  border: 1px solid rgba(199, 154, 59, .4);
+  border-radius: 21px 21px 5px 5px;
+  font: 600 19px var(--arabic);
+  box-shadow: 0 5px 15px rgba(23, 107, 81, .08);
+}
+html[data-theme="madrasha"] .level-grid article { position: relative; }
+html[data-theme="madrasha"] .level-grid article::before {
+  content: "";
+  width: 26px;
+  height: 28px;
+  position: absolute;
+  right: 24px;
+  top: 24px;
+  border: 1px solid rgba(199, 154, 59, .42);
+  border-radius: 13px 13px 3px 3px;
+}
+html[data-theme="madrasha"] .admin-body { background: #f2f5f2; }
+
+html[data-theme="coaching"] {
+  --background: #ffffff;
+  --foreground: #354456;
+  --card: #ffffff;
+  --card-foreground: #354456;
+  --popover: #ffffff;
+  --popover-foreground: #354456;
+  --primary: #3e6682;
+  --primary-foreground: #ffffff;
+  --secondary: #edf3f6;
+  --secondary-foreground: #1d2a3d;
+  --accent: #edf3f6;
+  --accent-foreground: #1d2a3d;
+  --border: #d8e0e5;
+  --input: #b9c6cf;
+  --ring: #b87852;
+  --ink: #1d2a3d;
+  --ink-deep: #121d2b;
+  --blue: #3e6682;
+  --blue-dark: #2f5068;
+  --blue-pale: #edf3f6;
+  --green: #2f7568;
+  --gold: #b87852;
+  --white: #ffffff;
+  --surface: #f7f9fa;
+  --text: #354456;
+  --muted: #697787;
+  --line: #d8e0e5;
+  --serif: "Sora", Arial, sans-serif;
+  --sans: "IBM Plex Sans", Arial, sans-serif;
+  --mono: "IBM Plex Mono", monospace;
+  --shadow: 0 18px 44px rgba(29, 42, 61, .11);
+}
+
+html[data-theme="coaching"] .utility-bar { color: #dbe5eb; font: 500 11px var(--mono); }
+html[data-theme="coaching"] .brand-mark {
+  position: relative;
+  border-radius: 3px;
+  background: var(--blue);
+  color: transparent;
+  font-size: 0;
+  box-shadow: 4px 4px 0 var(--gold);
+}
+html[data-theme="coaching"] .brand-mark::after {
+  content: "V";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--white);
+  font: 700 20px var(--serif);
+}
+html[data-theme="coaching"] .brand-light .brand-mark { background: var(--white); }
+html[data-theme="coaching"] .brand-light .brand-mark::after { color: var(--blue); }
+html[data-theme="coaching"] .brand strong { letter-spacing: -.03em; }
+html[data-theme="coaching"] .brand small { font: 600 8px var(--mono); letter-spacing: .08em; }
+html[data-theme="coaching"] .hero-content {
+  background-image: linear-gradient(rgba(62, 102, 130, .045) 1px, transparent 1px);
+  background-size: 100% 29px;
+}
+html[data-theme="coaching"] .home-hero .hero-content::before {
+  content: "DIAGNOSE  ─  PRACTISE  ─  IMPROVE";
+  max-width: 440px;
+  margin: 0 0 20px;
+  color: var(--muted);
+  font: 600 8px var(--mono);
+  letter-spacing: .07em;
+  word-spacing: 8px;
+}
+html[data-theme="coaching"] .status-pill {
+  margin-bottom: 18px;
+  border-radius: 3px;
+  background: #edf5f2;
+  color: #326b5f;
+  font: 600 11px var(--mono);
+}
+html[data-theme="coaching"] .overline,
+html[data-theme="coaching"] .eyebrow { font: 600 10px var(--mono); letter-spacing: .1em; }
+html[data-theme="coaching"] .home-hero h1 {
+  font-size: clamp(39px, 4.2vw, 60px);
+  line-height: 1.08;
+  letter-spacing: -.055em;
+}
+html[data-theme="coaching"] .hero-summary {
+  max-width: 620px;
+  color: #56607e;
+  font-size: 17px;
+  line-height: 1.65;
+}
+html[data-theme="coaching"] .button { border-radius: 3px; }
+html[data-theme="coaching"] .button:hover { transform: translateY(-1px); }
+html[data-theme="coaching"] .hero-caption {
+  border-left: 4px solid var(--gold);
+  background: rgba(18, 29, 43, .94);
+}
+html[data-theme="coaching"] .school-rail dt { font: 600 17px var(--mono); }
+html[data-theme="coaching"] .school-rail dd { color: #b9c6d1; }
+html[data-theme="coaching"] .task-card { border-radius: 3px; }
+html[data-theme="coaching"] .task-icon {
+  width: 45px;
+  height: 24px;
+  border-radius: 2px;
+  font: 600 9px var(--mono);
+  box-shadow: 3px 3px 0 var(--gold);
+}
+html[data-theme="coaching"] .principles article > span {
+  height: 30px;
+  border-radius: 2px;
+  font: 600 10px var(--mono);
+  box-shadow: 3px 3px 0 rgba(62, 102, 130, .14);
+}
+html[data-theme="coaching"] .level-grid article { position: relative; }
+html[data-theme="coaching"] .level-grid article::before {
+  content: "TARGET";
+  position: absolute;
+  right: 24px;
+  top: 28px;
+  color: #a1a8bf;
+  font: 600 7px var(--mono);
+  letter-spacing: .08em;
+}
+html[data-theme="coaching"] .admin-body { background: #f3f6f7; }
+
+@media (max-width: 640px) {
+  html[data-theme="madrasha"] .home-hero .hero-content::before {
+    margin-bottom: 12px;
+    font-size: 18px;
+  }
+  html[data-theme="coaching"] .home-hero .hero-content::before {
+    white-space: normal;
+    line-height: 1.7;
+  }
+}
