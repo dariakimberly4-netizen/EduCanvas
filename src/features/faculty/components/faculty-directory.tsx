@@ -1,9 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 
 import type { FacultyMember } from "@/features/school/domain/types";
 import { useSchoolContent } from "@/features/school/lib/content-store";
+import { resolveStoredAssetUrl } from "@/features/storage/domain/asset-url";
 
 type FacultyArea = "all" | "primary" | "science" | "humanities";
 
@@ -55,7 +57,22 @@ export function FacultyDirectory() {
       <div className="faculty-grid" id="public-faculty-grid">
         {profiles.map((profile, index) => (
           <article data-faculty-area={getFacultyArea(profile)} key={profile.id}>
-            <div className={`portrait tone-${(index % 6) + 1}`}><span>{initials(profile.name)}</span></div>
+            <div className={`portrait tone-${(index % 6) + 1}${profile.imageUrl ? " has-image" : ""}`}>
+              {profile.imageUrl ? (
+                <Image
+                  src={resolveStoredAssetUrl(
+                    profile.imageStorageFileId,
+                    profile.imageUrl,
+                  )}
+                  alt={`${profile.name}, ${profile.role}`}
+                  fill
+                  sizes="(max-width: 700px) 50vw, (max-width: 1020px) 33vw, 25vw"
+                  unoptimized
+                />
+              ) : (
+                <span>{initials(profile.name)}</span>
+              )}
+            </div>
             <h2>{profile.name}</h2><p>{profile.role}</p><small>{profile.subject} · {profile.experience} years</small>
           </article>
         ))}

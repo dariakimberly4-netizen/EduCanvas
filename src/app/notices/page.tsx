@@ -4,14 +4,31 @@ import { StructuredData } from "@/components/seo/structured-data";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { DocumentDirectory } from "@/features/notices/components/document-directory";
+import { SchoolContentProvider } from "@/features/school/lib/content-store";
+import { getSchoolContent } from "@/features/school/server/site-content-repository";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import { buildWebPageSchema } from "@/lib/seo/structured-data";
 
 export const metadata = generatePageMetadata("notices");
+export const dynamic = "force-dynamic";
 
-export default function NoticesPage() {
+export default async function NoticesPage() {
+  const content = await getSchoolContent();
+  const latestDocumentDate = content.documents
+    .filter((document) => document.status === "Published")
+    .toSorted((first, second) => second.date.localeCompare(first.date))[0]
+    ?.date;
+  const lastUpdated = latestDocumentDate
+    ? new Intl.DateTimeFormat("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }).format(new Date(`${latestDocumentDate}T00:00:00`))
+    : "No publications yet";
+
   return (
-    <div className="notices-page">
+    <SchoolContentProvider initialContent={content}>
+      <div className="notices-page">
       <StructuredData data={buildWebPageSchema("notices")} />
       <SiteHeader active="notices" />
       <main id="main">
@@ -23,7 +40,7 @@ export default function NoticesPage() {
           </div>
           <div className="hero-aside">
             <p>Search current examination schedules, holiday notices, parent updates, and verified student results.</p>
-            <p className="updated-note"><span aria-hidden="true" />Last updated 24 July 2026</p>
+            <p className="updated-note"><span aria-hidden="true" />Last updated {lastUpdated}</p>
           </div>
         </section>
 
@@ -35,6 +52,7 @@ export default function NoticesPage() {
         </section>
       </main>
       <SiteFooter />
-    </div>
+      </div>
+    </SchoolContentProvider>
   );
 }

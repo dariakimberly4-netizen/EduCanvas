@@ -2,8 +2,6 @@ import { expect, test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
-  await page.evaluate(() => window.localStorage.clear());
-  await page.reload();
 });
 
 test("home page presents the complete school journey", async ({ page }) => {

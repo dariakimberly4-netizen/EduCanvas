@@ -11,7 +11,7 @@ import { AdminOverview } from "@/features/admin/components/admin-overview";
 import { adminViewTitles, type AdminView } from "@/features/admin/domain/admin-view";
 import { AdminAccount } from "@/features/auth/components/admin-account";
 import type { AdminUser } from "@/features/auth/domain/admin-user";
-import { resetSchoolContent, useSchoolContent } from "@/features/school/lib/content-store";
+import { useSchoolContent } from "@/features/school/lib/content-store";
 
 const navigation: { view: AdminView; label: string; icon: string }[] = [
   { view: "overview", label: "Overview", icon: "⌂" },
@@ -21,7 +21,7 @@ const navigation: { view: AdminView; label: string; icon: string }[] = [
 ];
 
 export function AdminDashboard({ user }: { user: AdminUser }) {
-  const { content, updateContent, refresh } = useSchoolContent();
+  const { content, isSaving, updateContent } = useSchoolContent();
   const [view, setView] = useState<AdminView>("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [toast, setToast] = useState<{ title: string; message: string } | null>(null);
@@ -37,12 +37,6 @@ export function AdminDashboard({ user }: { user: AdminUser }) {
   function showToast(titleText: string, message: string) {
     setToast({ title: titleText, message });
     window.setTimeout(() => setToast(null), 4200);
-  }
-
-  function resetDemo() {
-    resetSchoolContent();
-    refresh();
-    showToast("Demo reset", "The original prototype content has been restored.");
   }
 
   return (
@@ -62,7 +56,7 @@ export function AdminDashboard({ user }: { user: AdminUser }) {
             </Link>
           ))}
         </nav>
-        <div className="sidebar-help"><strong>Prototype mode</strong><p>Changes are saved in this browser. No live database is connected.</p><button onClick={resetDemo} type="button">Reset demo data</button></div>
+        <div className="sidebar-help"><strong>Live publishing</strong><p>Content is stored in MongoDB. Images and documents are stored in Google Drive.</p></div>
         <Link className="back-site" href="/" target="_blank">↗ View public website</Link>
       </aside>
       <button
@@ -77,7 +71,7 @@ export function AdminDashboard({ user }: { user: AdminUser }) {
           <button className="mobile-admin-menu" onClick={() => setSidebarOpen(true)} aria-label="Open admin menu">☰</button>
           <div><p>{kicker}</p><h1>{title}</h1></div>
           <div className="admin-top-actions">
-            <span className="save-state"><i />All changes saved</span>
+            <span className="save-state"><i />{isSaving ? "Saving changes…" : "All changes saved"}</span>
             <Link className="preview-site" href="/" target="_blank">Preview website ↗</Link>
             <AdminAccount user={user} />
           </div>

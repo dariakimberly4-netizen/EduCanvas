@@ -7,6 +7,7 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import type { DocumentType, SchoolDocument } from "@/features/school/domain/types";
 import { useSchoolContent } from "@/features/school/lib/content-store";
+import { resolveStoredAssetUrl } from "@/features/storage/domain/asset-url";
 
 const academicYears = [
   { value: "all", label: "All years" },
@@ -33,7 +34,23 @@ function DocumentRow({ document, featured = false }: { document: SchoolDocument;
         <h3>{document.title}</h3>
         <p>{document.type === "Result" ? `Academic year ${document.academicYear ?? "2026–27"}` : `Published by ${document.publisher ?? "Academic Office"}`} · PDF · {document.fileSize ?? document.fileName}</p>
       </div>
-      <Link href="#" onClick={(event) => event.preventDefault()} aria-label={`Download ${document.title}`}><span>PDF</span>↓</Link>
+      <Link
+        href={
+          document.fileUrl
+            ? resolveStoredAssetUrl(
+                document.storageFileId,
+                document.fileUrl,
+                { download: true },
+              )
+            : "#"
+        }
+        onClick={document.fileUrl ? undefined : (event) => event.preventDefault()}
+        target={document.fileUrl ? "_blank" : undefined}
+        rel={document.fileUrl ? "noopener noreferrer" : undefined}
+        aria-label={`Download ${document.title}`}
+      >
+        <span>PDF</span>↓
+      </Link>
     </article>
   );
 }

@@ -1,36 +1,41 @@
+"use client";
+
 import Link from "next/link";
 
 import { Brand } from "@/components/site/brand";
+import { useSchoolContent } from "@/features/school/lib/content-store";
 
 export function SiteFooter() {
+  const { landing } = useSchoolContent().content;
+
   return (
     <footer className="site-footer">
       <div className="shell footer-grid">
         <div>
-          <Brand light />
-          <p>Structured learning, individual guidance, and a safe campus from Playgroup to Class XII.</p>
+          <Brand light name={landing.brandName} tagline={landing.brandTagline} />
+          <p>{landing.footerSummary}</p>
         </div>
         <div>
-          <h2>Explore</h2>
-          <Link href="/#school">Our school</Link>
-          <Link href="/#academics">Academics</Link>
-          <Link href="/faculty">Faculty</Link>
-          <Link href="/#admissions">Admissions</Link>
+          <h2>{landing.footerExploreHeading}</h2>
+          <Link href="/#school">{landing.navigationLabels.school}</Link>
+          <Link href="/#academics">{landing.navigationLabels.academics}</Link>
+          <Link href="/faculty">{landing.navigationLabels.faculty}</Link>
+          <Link href="/#admissions">{landing.navigationLabels.admissions}</Link>
         </div>
         <div>
-          <h2>For families</h2>
-          <Link href="/notices">Notices</Link>
-          <Link href="/notices#results">Results</Link>
-          <Link href="/admin">Staff login</Link>
+          <h2>{landing.footerFamiliesHeading}</h2>
+          <Link href="/notices">{landing.navigationLabels.notices}</Link>
+          <Link href="/notices#results">{landing.footerResultsLabel}</Link>
+          <Link href="/admin">{landing.staffLoginLabel}</Link>
         </div>
         <address>
-          <h2>Contact</h2>
-          12 Lakeview Road, Dhanmondi<br />
-          Dhaka 1209
-          <Link href="tel:+8801712345678">+880 1712 345 678</Link>
-          <Link href="mailto:office@shaplagrove.edu.bd">office@shaplagrove.edu.bd</Link>
+          <h2>{landing.footerContactHeading}</h2>
+          {landing.addressLineOne}<br />
+          {landing.addressLineTwo}
+          <Link href={`tel:${landing.phone.replaceAll(" ", "")}`}>{landing.phone}</Link>
+          <Link href={`mailto:${landing.email}`}>{landing.email}</Link>
         </address>
-        <small>© 2026 Shapla Grove School & College. Prototype website.</small>
+        <small>{landing.copyright}</small>
       </div>
     </footer>
   );

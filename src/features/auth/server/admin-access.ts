@@ -40,7 +40,7 @@ export async function getAuthenticatedAdminUser(): Promise<AdminUser | null> {
     return {
       name: "Playwright Admin",
       email: "admin@shaplagrove.test",
-      image: null,
+      image: "/assets/school-campus-hero.png",
     };
   }
 

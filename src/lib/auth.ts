@@ -1,4 +1,7 @@
 import { betterAuth } from "better-auth";
+import { createAuthMiddleware } from "better-auth/api";
+
+import { recordAuthenticationActivity } from "@/features/school/server/activity-repository";
 
 export const auth = betterAuth({
   appName: "EduCanvas",
@@ -17,5 +20,25 @@ export const auth = betterAuth({
       strategy: "jwe",
       refreshCache: true,
     },
+  },
+  hooks: {
+    after: createAuthMiddleware(async (context) => {
+      const session = context.context.newSession;
+
+      if (!context.path?.startsWith("/callback/") || !session?.user) return;
+
+      try {
+        await recordAuthenticationActivity({
+          action: "Administrator signed in",
+          email: session.user.email,
+          name: session.user.name,
+        });
+      } catch (error) {
+        context.context.logger.error(
+          "Sign-in activity could not be recorded",
+          error,
+        );
+      }
+    }),
   },
 });

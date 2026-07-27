@@ -6,6 +6,8 @@ import { SiteHeader } from "@/components/site/site-header";
 import { AdmissionInquiry } from "@/features/home/components/admission-inquiry";
 import { HomeHero } from "@/features/home/components/home-hero";
 import { SchoolStory } from "@/features/home/components/school-story";
+import { SchoolContentProvider } from "@/features/school/lib/content-store";
+import { getSchoolContent } from "@/features/school/server/site-content-repository";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import {
   buildEducationalOrganizationSchema,
@@ -14,30 +16,32 @@ import {
 } from "@/lib/seo/structured-data";
 
 export const metadata = generatePageMetadata("home");
+export const dynamic = "force-dynamic";
 
-const tasks = [
-  { number: "01", title: "Apply for admission", description: "Check eligibility, class availability, and request a campus visit.", action: "Start enquiry", href: "#admissions", primary: true },
-  { number: "02", title: "Read school notices", description: "View examination schedules, events, holidays, and parent updates.", action: "View notices", href: "/notices" },
-  { number: "03", title: "Check results", description: "Find verified term, model test, and board result documents.", action: "View results", href: "/notices#results" },
-  { number: "04", title: "Meet our faculty", description: "Learn about our teachers, subject leaders, and school leadership.", action: "Meet the team", href: "/faculty" },
-];
+export default async function HomePage() {
+  const content = await getSchoolContent();
+  const { landing } = content;
+  const taskLinks = ["#admissions", "/notices", "/notices#results", "/faculty"];
+  const updates = content.documents
+    .filter((document) => document.status === "Published")
+    .toSorted((first, second) => second.date.localeCompare(first.date))
+    .slice(0, 3)
+    .map((document) => {
+      const date = new Date(`${document.date}T00:00:00`);
+      return {
+        date: document.date,
+        day: String(date.getDate()).padStart(2, "0"),
+        month: date.toLocaleString("en-GB", { month: "short" }),
+        category:
+          document.type === "Result" ? "Results" : document.category,
+        title: document.title,
+        meta: `PDF · ${document.fileSize ?? document.fileName}`,
+        href: document.type === "Result" ? "/notices#results" : "/notices",
+      };
+    });
 
-const academicLevels = [
-  { classes: "Playgroup–KG", title: "Early years", description: "Language, number sense, movement, routines, and learning through guided play.", action: "Ask about early years" },
-  { classes: "Classes I–V", title: "Primary school", description: "Strong foundations in Bangla, English, mathematics, science, and social studies.", action: "Ask about primary" },
-  { classes: "Classes VI–X", title: "Secondary school", description: "Deeper subject study, practical science, digital skills, and SSC preparation.", action: "Ask about secondary" },
-  { classes: "Classes XI–XII", title: "Higher secondary", description: "Focused academic streams, university guidance, and HSC exam preparation.", action: "Ask about college" },
-];
-
-const updates = [
-  { date: "2026-07-24", day: "24", month: "Jul", category: "Examination", title: "Half-yearly examination schedule for Classes VI–X", meta: "PDF · 1.2 MB", href: "/notices" },
-  { date: "2026-07-18", day: "18", month: "Jul", category: "General", title: "School closure for Ashura", meta: "PDF · 420 KB", href: "/notices" },
-  { date: "2026-06-28", day: "28", month: "Jun", category: "Results", title: "First term results — Classes VI–VIII", meta: "PDF · 2.4 MB", href: "/notices#results" },
-];
-
-export default function HomePage() {
   return (
-    <>
+    <SchoolContentProvider initialContent={content}>
       <StructuredData
         data={[
           buildWebSiteSchema(),
@@ -49,27 +53,24 @@ export default function HomePage() {
       <main id="main">
         <HomeHero />
 
-        <section className="school-rail" aria-label="School at a glance">
+        <section className="school-rail" aria-label={landing.schoolGlanceHeading}>
           <div className="shell">
-            <p className="rail-title">School at a glance</p>
+            <p className="rail-title">{landing.schoolGlanceHeading}</p>
             <dl>
-              <div><dt>Playgroup–XII</dt><dd>Classes offered</dd></div>
-              <div><dt>18:1</dt><dd>Student–teacher ratio</dd></div>
-              <div><dt>Bangla & English</dt><dd>Languages of instruction</dd></div>
-              <div><dt>96%</dt><dd>2025 board pass rate</dd></div>
+              {landing.schoolStats.map((stat) => <div key={`${stat.value}-${stat.label}`}><dt>{stat.value}</dt><dd>{stat.label}</dd></div>)}
             </dl>
           </div>
         </section>
 
         <section className="task-section shell" aria-labelledby="task-title">
           <div className="section-intro">
-            <p className="overline">How can we help?</p>
-            <h2 id="task-title">Find what you need.</h2>
-            <p>Quick access for parents, students, and prospective families.</p>
+            <p className="overline">{landing.tasksKicker}</p>
+            <h2 id="task-title">{landing.tasksHeading}</h2>
+            <p>{landing.tasksIntro}</p>
           </div>
           <div className="task-grid">
-            {tasks.map((task) => (
-              <Link className={`task-card${task.primary ? " task-primary" : ""}`} href={task.href} key={task.number}>
+            {landing.tasks.map((task, index) => (
+              <Link className={`task-card${index === 0 ? " task-primary" : ""}`} href={taskLinks[index] ?? "#admissions"} key={`${task.number}-${task.title}`}>
                 <span className="task-icon" aria-hidden="true">{task.number}</span>
                 <div><h3>{task.title}</h3><p>{task.description}</p></div>
                 <strong>{task.action} <span aria-hidden="true">→</span></strong>
@@ -83,11 +84,11 @@ export default function HomePage() {
         <section className="academics-section" id="academics">
           <div className="shell">
             <div className="section-heading-row">
-              <div className="section-intro"><p className="overline">Academic pathway</p><h2>Learning that progresses with your child.</h2></div>
-              <p>Each stage has clear academic goals, age-appropriate support, and preparation for what comes next.</p>
+              <div className="section-intro"><p className="overline">{landing.academicsKicker}</p><h2>{landing.academicsHeading}</h2></div>
+              <p>{landing.academicsIntro}</p>
             </div>
             <div className="level-grid">
-              {academicLevels.map((level) => (
+              {landing.academicLevels.map((level) => (
                 <article key={level.title}>
                   <span>{level.classes}</span>
                   <h3>{level.title}</h3>
@@ -101,8 +102,8 @@ export default function HomePage() {
 
         <section className="updates-section shell">
           <div className="updates-heading">
-            <div className="section-intro"><p className="overline">Current information</p><h2>Latest from the school.</h2></div>
-            <Link className="button button-secondary" href="/notices">View all notices & results</Link>
+            <div className="section-intro"><p className="overline">{landing.updatesKicker}</p><h2>{landing.updatesHeading}</h2></div>
+            <Link className="button button-secondary" href="/notices">{landing.updatesAction}</Link>
           </div>
           <div className="update-list">
             {updates.map((update) => (
@@ -118,6 +119,6 @@ export default function HomePage() {
         <AdmissionInquiry />
       </main>
       <SiteFooter />
-    </>
+    </SchoolContentProvider>
   );
 }

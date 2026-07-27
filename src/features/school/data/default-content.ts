@@ -2,16 +2,96 @@ import type { SchoolContent } from "@/features/school/domain/types";
 
 export const defaultSchoolContent: SchoolContent = {
   landing: {
+    brandName: "Shapla Grove",
+    brandTagline: "School & College · Est. 1998",
+    utilityHours: "Sunday–Thursday, 8:00 AM–4:00 PM",
+    staffLoginLabel: "Staff login",
+    navigationLabels: {
+      home: "Home",
+      school: "Our school",
+      academics: "Academics",
+      faculty: "Faculty",
+      notices: "Notices & results",
+      admissions: "Admissions",
+    },
     admissionStatus: "Admissions open for 2026–27",
     schoolDescriptor: "English-version national curriculum · Dhanmondi, Dhaka",
     heroTitle: "A complete education from Playgroup to Class XII.",
     heroSummary:
       "Shapla Grove is a co-educational school where strong academics, attentive teachers, and a safe campus help every student progress with confidence.",
+    heroPrimaryAction: "Start an admission enquiry",
+    heroSecondaryAction: "Explore our school",
+    heroHelpText: "Need help? Call our admissions office at",
     phone: "+880 1712 345 678",
+    schoolGlanceHeading: "School at a glance",
+    schoolStats: [
+      { value: "Playgroup–XII", label: "Classes offered" },
+      { value: "18:1", label: "Student–teacher ratio" },
+      { value: "Bangla & English", label: "Languages of instruction" },
+      { value: "96%", label: "2025 board pass rate" },
+    ],
+    tasksKicker: "How can we help?",
+    tasksHeading: "Find what you need.",
+    tasksIntro: "Quick access for parents, students, and prospective families.",
+    tasks: [
+      { number: "01", title: "Apply for admission", description: "Check eligibility, class availability, and request a campus visit.", action: "Start enquiry" },
+      { number: "02", title: "Read school notices", description: "View examination schedules, events, holidays, and parent updates.", action: "View notices" },
+      { number: "03", title: "Check results", description: "Find verified term, model test, and board result documents.", action: "View results" },
+      { number: "04", title: "Meet our faculty", description: "Learn about our teachers, subject leaders, and school leadership.", action: "Meet the team" },
+    ],
+    storyKicker: "Why Shapla Grove",
     admissionYear: "2026–27",
     schoolHeading: "A clear standard for learning and care.",
     schoolIntro:
       "Families choose Shapla Grove for a balanced education: structured teaching, close guidance, and room for students to discover what they do well.",
+    schoolStoryAction: "Meet the educators behind our approach",
+    principles: [
+      { marker: "A", title: "Strong academic foundations", description: "National curriculum teaching supported by laboratories, technology, language practice, and regular feedback." },
+      { marker: "B", title: "Every student is known", description: "An 18:1 student–teacher ratio helps teachers identify strengths, provide support, and keep families informed." },
+      { marker: "C", title: "Character beyond the classroom", description: "Clubs, sport, arts, leadership, and service help students become responsible and confident young people." },
+    ],
+    academicsKicker: "Academic pathway",
+    academicsHeading: "Learning that progresses with your child.",
+    academicsIntro: "Each stage has clear academic goals, age-appropriate support, and preparation for what comes next.",
+    academicLevels: [
+      { classes: "Playgroup–KG", title: "Early years", description: "Language, number sense, movement, routines, and learning through guided play.", action: "Ask about early years" },
+      { classes: "Classes I–V", title: "Primary school", description: "Strong foundations in Bangla, English, mathematics, science, and social studies.", action: "Ask about primary" },
+      { classes: "Classes VI–X", title: "Secondary school", description: "Deeper subject study, practical science, digital skills, and SSC preparation.", action: "Ask about secondary" },
+      { classes: "Classes XI–XII", title: "Higher secondary", description: "Focused academic streams, university guidance, and HSC exam preparation.", action: "Ask about college" },
+    ],
+    updatesKicker: "Current information",
+    updatesHeading: "Latest from the school.",
+    updatesAction: "View all notices & results",
+    admissionsHeading: "See whether Shapla Grove is right for your child.",
+    admissionsIntro: "Tell us which class you are considering. Our admissions team will call you to explain availability, requirements, fees, and the next campus visit.",
+    admissionBenefits: [
+      "No application fee for an initial enquiry",
+      "Response within one school day",
+      "Campus visits available Sunday–Thursday",
+    ],
+    inquiryTitle: "Request admission information",
+    inquiryRequiredNote: "Fields marked * are required.",
+    guardianLabel: "Parent or guardian name",
+    guardianPlaceholder: "Enter your full name",
+    phoneLabel: "Phone number",
+    phonePlaceholder: "+880 1XXX XXXXXX",
+    classLabel: "Class you are interested in",
+    classPlaceholder: "Select a class level",
+    classLevels: ["Playgroup–KG", "Classes I–V", "Classes VI–X", "Classes XI–XII"],
+    inquirySubmitLabel: "Request a call from admissions",
+    inquirySubmittingLabel: "Sending enquiry…",
+    inquiryReceivedLabel: "Enquiry received",
+    inquiryConsentText: "By continuing, you agree that our admissions office may contact you about this enquiry.",
+    inquirySuccessText: "Our admissions office will contact you within one school day.",
+    footerSummary: "Structured learning, individual guidance, and a safe campus from Playgroup to Class XII.",
+    footerExploreHeading: "Explore",
+    footerFamiliesHeading: "For families",
+    footerResultsLabel: "Results",
+    footerContactHeading: "Contact",
+    addressLineOne: "12 Lakeview Road, Dhanmondi",
+    addressLineTwo: "Dhaka 1209",
+    email: "office@shaplagrove.edu.bd",
+    copyright: "© 2026 Shapla Grove School & College. Prototype website.",
     publishedAt: "26 Jul 2026, 10:24 AM",
   },
   heroSlides: [
@@ -52,3 +132,27 @@ export const defaultSchoolContent: SchoolContent = {
 
 export const cloneSchoolContent = (content: SchoolContent): SchoolContent =>
   structuredClone(content);
+
+export function normalizeSchoolContent(content: SchoolContent): SchoolContent {
+  const defaults = defaultSchoolContent.landing;
+  const landing = content.landing as Partial<SchoolContent["landing"]>;
+
+  return {
+    ...content,
+    landing: {
+      ...defaults,
+      ...landing,
+      navigationLabels: {
+        ...defaults.navigationLabels,
+        ...landing.navigationLabels,
+      },
+      schoolStats: landing.schoolStats ?? defaults.schoolStats,
+      tasks: landing.tasks ?? defaults.tasks,
+      principles: landing.principles ?? defaults.principles,
+      academicLevels: landing.academicLevels ?? defaults.academicLevels,
+      admissionBenefits:
+        landing.admissionBenefits ?? defaults.admissionBenefits,
+      classLevels: landing.classLevels ?? defaults.classLevels,
+    },
+  };
+}

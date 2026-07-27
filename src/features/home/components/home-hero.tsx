@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { useSchoolContent } from "@/features/school/lib/content-store";
+import { resolveStoredAssetUrl } from "@/features/storage/domain/asset-url";
 
 export function HomeHero() {
   const { content } = useSchoolContent();
@@ -27,15 +28,15 @@ export function HomeHero() {
           <h1>{landing.heroTitle}</h1>
           <p className="hero-summary">{landing.heroSummary}</p>
           <div className="button-row">
-            <Link className="button button-primary" href="#admissions">Start an admission enquiry</Link>
-            <Link className="button button-secondary" href="#school">Explore our school</Link>
+            <Link className="button button-primary" href="#admissions">{landing.heroPrimaryAction}</Link>
+            <Link className="button button-secondary" href="#school">{landing.heroSecondaryAction}</Link>
           </div>
-          <p className="hero-help">Need help? Call our admissions office at <Link href={`tel:${landing.phone.replaceAll(" ", "")}`}>{landing.phone}</Link>.</p>
+          <p className="hero-help">{landing.heroHelpText} <Link href={`tel:${landing.phone.replaceAll(" ", "")}`}>{landing.phone}</Link>.</p>
         </div>
         <div
           className={`hero-media${heroSlides.length <= 1 ? " single-slide" : ""}`}
           aria-roledescription="carousel"
-          aria-label="Life at Shapla Grove"
+          aria-label={`Life at ${landing.brandName}`}
         >
           <div className="hero-slides" aria-live="off">
             {heroSlides.map((slide, index) => (
@@ -45,7 +46,7 @@ export function HomeHero() {
                 aria-hidden={activeIndex !== index}
                 key={slide.id}
               >
-                <Image src={slide.src} alt={slide.alt} fill sizes="(max-width: 1020px) 100vw, 50vw" priority={index === 0} unoptimized={slide.src.startsWith("data:")} />
+                <Image src={resolveStoredAssetUrl(slide.storageFileId, slide.src)} alt={slide.alt} fill sizes="(max-width: 1020px) 100vw, 50vw" priority={index === 0} unoptimized={!slide.isLocalAsset} />
                 <div className="hero-caption"><strong>{slide.heading}</strong><span>{slide.supporting}</span></div>
               </article>
             ))}

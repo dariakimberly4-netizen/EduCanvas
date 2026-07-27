@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { FormEvent, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -12,10 +13,16 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import type { FacultyMember, PublicationStatus, SchoolContent } from "@/features/school/domain/types";
+import { resolveStoredAssetUrl } from "@/features/storage/domain/asset-url";
+import {
+  deleteAsset,
+  uploadAsset,
+} from "@/features/storage/lib/asset-client";
+import { useFilePreview } from "@/features/storage/lib/use-file-preview";
 
 interface AdminFacultyProps {
   content: SchoolContent;
-  updateContent: (content: SchoolContent) => void;
+  updateContent: (content: SchoolContent) => Promise<void>;
   notify: (title: string, message: string) => void;
 }
 
@@ -25,16 +32,18 @@ function initials(name: string) {
   return name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
 }
 
-function today() {
-  return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(new Date());
-}
-
 export function AdminFaculty({ content, updateContent, notify }: AdminFacultyProps) {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"all" | PublicationStatus>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<FacultyMember | null>(null);
   const [pendingDelete, setPendingDelete] = useState<FacultyMember | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const {
+    preview: selectedImage,
+    selectFile: selectImage,
+    clearPreview: clearImagePreview,
+  } = useFilePreview();
 
   const profiles = useMemo(() => content.faculty.filter((profile) => {
     const matchesQuery = `${profile.name} ${profile.role} ${profile.department} ${profile.subject}`.toLowerCase().includes(query.trim().toLowerCase());
@@ -42,44 +51,73 @@ export function AdminFaculty({ content, updateContent, notify }: AdminFacultyPro
   }), [content.faculty, query, status]);
 
   function openEditor(profile: FacultyMember | null) {
+    clearImagePreview();
     setEditing(profile);
     setDialogOpen(true);
   }
 
-  function saveProfile(event: FormEvent<HTMLFormElement>) {
+  async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const profile: FacultyMember = {
-      id: editing?.id ?? Date.now(),
-      name: String(data.get("name")),
-      role: String(data.get("role")),
-      department: String(data.get("department")),
-      subject: String(data.get("subject")),
-      experience: Number(data.get("experience")),
-      status: String(data.get("status")) as PublicationStatus,
-      bio: String(data.get("bio")),
-    };
-    const faculty = editing
-      ? content.faculty.map((item) => item.id === editing.id ? profile : item)
-      : [...content.faculty, profile];
-    updateContent({
-      ...content,
-      faculty,
-      activity: [{ action: editing ? "Updated faculty profile" : "Added faculty profile", item: profile.name, time: today() }, ...content.activity].slice(0, 8),
-    });
-    setDialogOpen(false);
-    notify(editing ? "Profile updated" : "Profile added", `${profile.name} is ${profile.status.toLowerCase()} on the faculty page.`);
+    const image = data.get("image");
+    let uploadedFileId: string | undefined;
+    setIsUploadingImage(true);
+
+    try {
+      const uploaded =
+        image instanceof File && image.size
+          ? await uploadAsset(image, "image")
+          : null;
+      uploadedFileId = uploaded?.fileId;
+      const profile: FacultyMember = {
+        id: editing?.id ?? Date.now(),
+        name: String(data.get("name")),
+        role: String(data.get("role")),
+        department: String(data.get("department")),
+        subject: String(data.get("subject")),
+        experience: Number(data.get("experience")),
+        status: String(data.get("status")) as PublicationStatus,
+        bio: String(data.get("bio")),
+        imageUrl: uploaded?.directUrl ?? editing?.imageUrl,
+        imageStorageFileId:
+          uploaded?.fileId ?? editing?.imageStorageFileId,
+      };
+      const faculty = editing
+        ? content.faculty.map((item) =>
+            item.id === editing.id ? profile : item,
+          )
+        : [...content.faculty, profile];
+
+      await updateContent({
+        ...content,
+        faculty,
+      });
+
+      setDialogOpen(false);
+      clearImagePreview();
+      notify(editing ? "Profile updated" : "Profile added", `${profile.name} is ${profile.status.toLowerCase()} on the faculty page.`);
+    } catch (error) {
+      if (uploadedFileId) {
+        await deleteAsset(uploadedFileId).catch(() => undefined);
+      }
+      notify("Profile save failed", error instanceof Error ? error.message : "The faculty profile could not be saved.");
+    } finally {
+      setIsUploadingImage(false);
+    }
   }
 
-  function deleteProfile() {
+  async function deleteProfile() {
     if (!pendingDelete) return;
-    updateContent({
-      ...content,
-      faculty: content.faculty.filter((item) => item.id !== pendingDelete.id),
-      activity: [{ action: "Removed faculty profile", item: pendingDelete.name, time: today() }, ...content.activity].slice(0, 8),
-    });
-    notify("Profile removed", `${pendingDelete.name} was removed from the teaching team.`);
-    setPendingDelete(null);
+    try {
+      await updateContent({
+        ...content,
+        faculty: content.faculty.filter((item) => item.id !== pendingDelete.id),
+      });
+      notify("Profile removed", `${pendingDelete.name} was removed from the teaching team.`);
+      setPendingDelete(null);
+    } catch (error) {
+      notify("Profile removal failed", error instanceof Error ? error.message : "The faculty profile could not be removed.");
+    }
   }
 
   return (
@@ -98,7 +136,25 @@ export function AdminFaculty({ content, updateContent, notify }: AdminFacultyPro
         <div>
           {profiles.map((profile) => (
             <article className="faculty-manager-row" key={profile.id}>
-              <div className="manager-person"><span>{initials(profile.name)}</span><div><strong>{profile.name}</strong><small>{profile.role} · {profile.subject}</small></div></div>
+              <div className="manager-person">
+                <div className="manager-avatar">
+                  {profile.imageUrl ? (
+                    <Image
+                      src={resolveStoredAssetUrl(
+                        profile.imageStorageFileId,
+                        profile.imageUrl,
+                      )}
+                      alt=""
+                      width={38}
+                      height={38}
+                      unoptimized
+                    />
+                  ) : (
+                    <span>{initials(profile.name)}</span>
+                  )}
+                </div>
+                <div><strong>{profile.name}</strong><small>{profile.role} · {profile.subject}</small></div>
+              </div>
               <span>{profile.department}</span><span>{profile.experience} years</span>
               <span><i className={`status-chip ${profile.status.toLowerCase()}`}>{profile.status}</i></span>
               <div className="row-actions"><button onClick={() => openEditor(profile)} type="button">Edit</button><button className="danger-link" onClick={() => setPendingDelete(profile)} type="button">Remove</button></div>
@@ -108,7 +164,13 @@ export function AdminFaculty({ content, updateContent, notify }: AdminFacultyPro
       </div>
       {!profiles.length && <div className="empty-state"><span>⌕</span><h3>No matching profiles</h3><p>Try a different search term or status filter.</p></div>}
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) clearImagePreview();
+        }}
+      >
         <DialogContent className="admin-dialog !max-w-[660px] !gap-0 !rounded-[7px] !p-0" showCloseButton={false}>
           <form onSubmit={saveProfile} key={editing?.id ?? "new"}>
             <div className="dialog-heading"><div><p className="overline">Faculty profile</p><DialogTitle>{editing ? "Edit faculty member" : "Add faculty member"}</DialogTitle></div><DialogClose asChild><button type="button" aria-label="Close dialog">×</button></DialogClose></div>
@@ -120,9 +182,55 @@ export function AdminFaculty({ content, updateContent, notify }: AdminFacultyPro
               <label>Subject or specialty *<Input name="subject" defaultValue={editing?.subject} required placeholder="Example: Physics" /></label>
               <label>Years of experience *<Input name="experience" defaultValue={editing?.experience} type="number" min={0} max={50} required /></label>
               <label>Profile status *<select name="status" defaultValue={editing?.status ?? "Published"}><option>Published</option><option>Draft</option></select></label>
+              <label className="image-drop faculty-image-drop full-field">
+                <input
+                  name="image"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(event) =>
+                    selectImage(event.target.files?.[0] ?? null)
+                  }
+                />
+                <span aria-hidden="true">＋</span>
+                <strong>
+                  {editing?.imageUrl
+                    ? "Replace faculty photo"
+                    : "Choose faculty photo"}
+                </strong>
+                <small>
+                  JPG, PNG or WebP · Maximum 8 MB
+                  {editing?.imageUrl ? " · Leave empty to keep current photo" : ""}
+                </small>
+                {(selectedImage || editing?.imageUrl) && (
+                  <div
+                    className="selected-image-preview"
+                    role="img"
+                    aria-label={
+                      selectedImage
+                        ? `Preview of ${selectedImage.fileName}`
+                        : `Current faculty photo of ${editing?.name}`
+                    }
+                    style={{
+                      backgroundImage: `url("${
+                        selectedImage?.url ??
+                        resolveStoredAssetUrl(
+                          editing?.imageStorageFileId,
+                          editing?.imageUrl ?? "",
+                        )
+                      }")`,
+                    }}
+                  >
+                    <span>
+                      {selectedImage
+                        ? `${selectedImage.fileName} · Click to change`
+                        : "Current photo · Click to replace"}
+                    </span>
+                  </div>
+                )}
+              </label>
               <label className="full-field">Short biography<textarea name="bio" defaultValue={editing?.bio} rows={4} maxLength={260} placeholder="A concise introduction for families" /></label>
             </div>
-            <div className="dialog-actions"><DialogClose asChild><Button className="button button-secondary" type="button">Cancel</Button></DialogClose><Button className="button button-primary" type="submit">Save profile</Button></div>
+            <div className="dialog-actions"><DialogClose asChild><Button className="button button-secondary" type="button">Cancel</Button></DialogClose><Button className="button button-primary" type="submit" disabled={isUploadingImage}>{isUploadingImage ? "Uploading photo…" : "Save profile"}</Button></div>
           </form>
         </DialogContent>
       </Dialog>

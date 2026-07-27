@@ -4,14 +4,20 @@ import { StructuredData } from "@/components/seo/structured-data";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { FacultyDirectory } from "@/features/faculty/components/faculty-directory";
+import { SchoolContentProvider } from "@/features/school/lib/content-store";
+import { getSchoolContent } from "@/features/school/server/site-content-repository";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import { buildWebPageSchema } from "@/lib/seo/structured-data";
 
 export const metadata = generatePageMetadata("faculty");
+export const dynamic = "force-dynamic";
 
-export default function FacultyPage() {
+export default async function FacultyPage() {
+  const content = await getSchoolContent();
+
   return (
-    <div className="faculty-page">
+    <SchoolContentProvider initialContent={content}>
+      <div className="faculty-page">
       <StructuredData data={buildWebPageSchema("faculty")} />
       <SiteHeader active="faculty" />
       <main id="main">
@@ -50,6 +56,7 @@ export default function FacultyPage() {
         </section>
       </main>
       <SiteFooter />
-    </div>
+      </div>
+    </SchoolContentProvider>
   );
 }

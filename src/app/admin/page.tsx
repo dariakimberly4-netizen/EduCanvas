@@ -5,6 +5,8 @@ import {
   getAuthenticatedAdminUser,
   isAuthorizedAdmin,
 } from "@/features/auth/server/admin-access";
+import { SchoolContentProvider } from "@/features/school/lib/content-store";
+import { getSchoolContent } from "@/features/school/server/site-content-repository";
 import { generatePrivatePageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = generatePrivatePageMetadata("Website management");
@@ -20,5 +22,11 @@ export default async function AdminPage() {
     redirect("/admin/login?error=not-authorized");
   }
 
-  return <AdminDashboard user={user} />;
+  const content = await getSchoolContent();
+
+  return (
+    <SchoolContentProvider initialContent={content}>
+      <AdminDashboard user={user} />
+    </SchoolContentProvider>
+  );
 }

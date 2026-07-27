@@ -12,24 +12,20 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import type { HeroSlide, LandingContent, SchoolContent } from "@/features/school/domain/types";
+import { AdminHomeContentFields } from "@/features/admin/components/admin-home-content-fields";
+import type { HeroSlide, SchoolContent } from "@/features/school/domain/types";
+import { resolveStoredAssetUrl } from "@/features/storage/domain/asset-url";
+import {
+  deleteAsset,
+  uploadAsset,
+} from "@/features/storage/lib/asset-client";
+import { useFilePreview } from "@/features/storage/lib/use-file-preview";
 
 interface AdminLandingProps {
   content: SchoolContent;
-  updateContent: (content: SchoolContent) => void;
+  updateContent: (content: SchoolContent) => Promise<void>;
   notify: (title: string, message: string) => void;
 }
-
-const editableFields: { key: keyof LandingContent; label: string }[] = [
-  { key: "admissionStatus", label: "Admission status" },
-  { key: "schoolDescriptor", label: "School description" },
-  { key: "heroTitle", label: "Main heading" },
-  { key: "heroSummary", label: "Introduction" },
-  { key: "phone", label: "Phone number" },
-  { key: "admissionYear", label: "Admission year" },
-  { key: "schoolHeading", label: "School story heading" },
-  { key: "schoolIntro", label: "School introduction" },
-];
 
 function formatPublishedAt() {
   return new Intl.DateTimeFormat("en-GB", {
@@ -37,58 +33,57 @@ function formatPublishedAt() {
   }).format(new Date());
 }
 
-function formatActivityDate() {
-  return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(new Date());
-}
-
-function readFile(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error("The image could not be read."));
-    reader.onload = () => resolve(String(reader.result));
-    reader.readAsDataURL(file);
-  });
-}
-
 export function AdminLanding({ content, updateContent, notify }: AdminLandingProps) {
   const [draft, setDraft] = useState(content.landing);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [mobilePreview, setMobilePreview] = useState(false);
+  const [pendingSlideDelete, setPendingSlideDelete] = useState<HeroSlide | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const {
+    preview: selectedImage,
+    selectFile: selectImage,
+    clearPreview: clearImagePreview,
+  } = useFilePreview();
 
   const changes = useMemo(
-    () => editableFields.filter(({ key }) => draft[key] !== content.landing[key]),
+    () => JSON.stringify(draft) === JSON.stringify(content.landing)
+      ? []
+      : [{ label: "Homepage content", value: "One or more homepage sections were updated." }],
     [content.landing, draft],
   );
   const dirty = changes.length > 0;
 
-  function updateField(key: keyof LandingContent, value: string) {
-    setDraft((current) => ({ ...current, [key]: value }));
-  }
-
-  function publishLanding() {
+  async function publishLanding() {
     const nextLanding = { ...draft, publishedAt: formatPublishedAt() };
-    updateContent({
-      ...content,
-      landing: nextLanding,
-      activity: [{ action: "Updated landing page", item: "School information", time: formatActivityDate() }, ...content.activity].slice(0, 8),
-    });
-    setDraft(nextLanding);
-    setReviewOpen(false);
-    notify("Landing page published", "Your changes are now visible on the public website.");
+    try {
+      await updateContent({
+        ...content,
+        landing: nextLanding,
+      });
+      setDraft(nextLanding);
+      setReviewOpen(false);
+      notify("Landing page published", "Your changes are now visible on the public website.");
+    } catch (error) {
+      notify("Publishing failed", error instanceof Error ? error.message : "The landing page could not be saved.");
+    }
   }
 
-  function updateSlides(slides: HeroSlide[], message: string) {
-    updateContent({ ...content, heroSlides: slides });
+  async function updateSlides(slides: HeroSlide[], message: string) {
+    await updateContent({ ...content, heroSlides: slides });
     notify("Carousel updated", message);
   }
 
-  function moveSlide(id: number, direction: -1 | 1) {
+  async function moveSlide(id: number, direction: -1 | 1) {
     const index = content.heroSlides.findIndex((slide) => slide.id === id);
     const target = index + direction;
     if (index < 0 || target < 0 || target >= content.heroSlides.length) return;
     const slides = [...content.heroSlides];
     [slides[index], slides[target]] = [slides[target], slides[index]];
-    updateSlides(slides, "The new slide order is visible on the home page.");
+    try {
+      await updateSlides(slides, "The new slide order is visible on the home page.");
+    } catch (error) {
+      notify("Carousel update failed", error instanceof Error ? error.message : "The slide order could not be saved.");
+    }
   }
 
   async function addSlide(event: FormEvent<HTMLFormElement>) {
@@ -98,16 +93,45 @@ export function AdminLanding({ content, updateContent, notify }: AdminLandingPro
     const data = new FormData(form);
     const file = data.get("image");
     if (!(file instanceof File) || !file.size) return;
-    const src = await readFile(file);
-    const nextSlide: HeroSlide = {
-      id: Date.now(),
-      src,
-      heading: String(data.get("heading")),
-      supporting: String(data.get("supporting")),
-      alt: String(data.get("alt")),
-    };
-    updateSlides([...content.heroSlides, nextSlide], "The new image was added to the home-page carousel.");
-    form.reset();
+    let uploadedFileId: string | undefined;
+    setIsUploadingImage(true);
+
+    try {
+      const uploaded = await uploadAsset(file, "image");
+      uploadedFileId = uploaded.fileId;
+      const nextSlide: HeroSlide = {
+        id: Date.now(),
+        src: uploaded.directUrl,
+        heading: String(data.get("heading")),
+        supporting: String(data.get("supporting")),
+        alt: String(data.get("alt")),
+        storageFileId: uploaded.fileId,
+      };
+      await updateSlides([...content.heroSlides, nextSlide], "The new image was added to the home-page carousel.");
+      form.reset();
+      clearImagePreview();
+    } catch (error) {
+      if (uploadedFileId) {
+        await deleteAsset(uploadedFileId).catch(() => undefined);
+      }
+      notify("Image upload failed", error instanceof Error ? error.message : "The carousel image could not be uploaded.");
+    } finally {
+      setIsUploadingImage(false);
+    }
+  }
+
+  async function removeSlide() {
+    if (!pendingSlideDelete) return;
+
+    try {
+      await updateSlides(
+        content.heroSlides.filter((item) => item.id !== pendingSlideDelete.id),
+        "The image was removed from the carousel.",
+      );
+      setPendingSlideDelete(null);
+    } catch (error) {
+      notify("Image removal failed", error instanceof Error ? error.message : "The carousel image could not be removed.");
+    }
   }
 
   return (
@@ -124,25 +148,7 @@ export function AdminLanding({ content, updateContent, notify }: AdminLandingPro
 
       <div className="editor-layout">
         <form className="content-editor" onSubmit={(event) => { event.preventDefault(); setReviewOpen(true); }}>
-          <div className="editor-section">
-            <div className="editor-section-heading"><span>Hero section</span><p>The first information families see.</p></div>
-            <label>Admission status<Input value={draft.admissionStatus} onChange={(event) => updateField("admissionStatus", event.target.value)} maxLength={60} required /></label>
-            <label>School description line<Input value={draft.schoolDescriptor} onChange={(event) => updateField("schoolDescriptor", event.target.value)} maxLength={90} required /></label>
-            <label>Main heading<textarea value={draft.heroTitle} onChange={(event) => updateField("heroTitle", event.target.value)} rows={3} maxLength={100} required /><small><b>{draft.heroTitle.length}</b>/100 characters</small></label>
-            <label>Introduction<textarea value={draft.heroSummary} onChange={(event) => updateField("heroSummary", event.target.value)} rows={4} maxLength={240} required /><small><b>{draft.heroSummary.length}</b>/240 characters</small></label>
-          </div>
-          <div className="editor-section">
-            <div className="editor-section-heading"><span>Admissions contact</span><p>How families contact the school.</p></div>
-            <div className="form-grid-two">
-              <label>Phone number<Input value={draft.phone} onChange={(event) => updateField("phone", event.target.value)} type="tel" required /></label>
-              <label>Admission year<Input value={draft.admissionYear} onChange={(event) => updateField("admissionYear", event.target.value)} required /></label>
-            </div>
-          </div>
-          <div className="editor-section">
-            <div className="editor-section-heading"><span>School story</span><p>Your positioning on the public page.</p></div>
-            <label>Section heading<Input value={draft.schoolHeading} onChange={(event) => updateField("schoolHeading", event.target.value)} maxLength={90} required /></label>
-            <label>School introduction<textarea value={draft.schoolIntro} onChange={(event) => updateField("schoolIntro", event.target.value)} rows={5} maxLength={360} required /></label>
-          </div>
+          <AdminHomeContentFields draft={draft} onChange={setDraft} />
           <div className="editor-actions">
             <span className={dirty ? "dirty" : undefined}>{dirty ? "You have unpublished changes" : "No unpublished changes"}</span>
             <Button className="button button-secondary" onClick={() => setDraft(content.landing)} type="button">Discard changes</Button>
@@ -153,9 +159,9 @@ export function AdminLanding({ content, updateContent, notify }: AdminLandingPro
         <aside className="live-preview">
           <div className="preview-toolbar"><div><span /><span /><span /></div><b>Live preview</b><button onClick={() => setMobilePreview((value) => !value)} type="button">{mobilePreview ? "Desktop view" : "Mobile view"}</button></div>
           <div className={`preview-frame${mobilePreview ? " mobile" : ""}`}>
-            <div className="mini-nav"><b>Shapla Grove</b><span>Admissions</span></div>
+            <div className="mini-nav"><b>{draft.brandName}</b><span>{draft.navigationLabels.admissions}</span></div>
             <div className="mini-hero">
-              <small>{draft.admissionStatus}</small><p>{draft.schoolDescriptor}</p><h3>{draft.heroTitle}</h3><p>{draft.heroSummary}</p><button type="button">Start an admission enquiry</button>
+              <small>{draft.admissionStatus}</small><p>{draft.schoolDescriptor}</p><h3>{draft.heroTitle}</h3><p>{draft.heroSummary}</p><button type="button">{draft.heroPrimaryAction}</button>
             </div>
           </div>
           <p className="preview-help">This preview updates as you type. Use “Review changes” before publishing.</p>
@@ -171,26 +177,44 @@ export function AdminLanding({ content, updateContent, notify }: AdminLandingPro
           <div className="slide-manager-list">
             {content.heroSlides.map((slide, index) => (
               <article className="slide-manager-item" key={slide.id}>
-                <div className="slide-thumbnail"><Image src={slide.src} alt="" width={112} height={64} unoptimized={slide.src.startsWith("data:")} /></div>
+                <div className="slide-thumbnail"><Image src={resolveStoredAssetUrl(slide.storageFileId, slide.src)} alt="" width={112} height={64} unoptimized={!slide.isLocalAsset} /></div>
                 <div className="slide-details"><span>Slide {index + 1}</span><strong>{slide.heading}</strong><small>{slide.supporting || "No supporting line"}</small></div>
                 <div className="slide-order">
                   <button type="button" onClick={() => moveSlide(slide.id, -1)} aria-label={`Move slide ${index + 1} earlier`} disabled={index === 0}>↑</button>
                   <button type="button" onClick={() => moveSlide(slide.id, 1)} aria-label={`Move slide ${index + 1} later`} disabled={index === content.heroSlides.length - 1}>↓</button>
                 </div>
-                <button className="slide-remove" type="button" onClick={() => updateSlides(content.heroSlides.filter((item) => item.id !== slide.id), "The image was removed from the carousel.")} disabled={content.heroSlides.length === 1}>Remove</button>
+                <button className="slide-remove" type="button" onClick={() => setPendingSlideDelete(slide)} disabled={content.heroSlides.length === 1}>Remove</button>
               </article>
             ))}
           </div>
           <form className={`slide-upload-form${content.heroSlides.length >= 6 ? " at-limit" : ""}`} onSubmit={addSlide}>
-            <div><h3>Add a carousel image</h3><p>The image is resized for the prototype before it is saved.</p></div>
+            <div><h3>Add a carousel image</h3><p>The image is stored securely in the configured Google Drive folder.</p></div>
             <label className="image-drop">
-              <input name="image" type="file" accept="image/jpeg,image/png,image/webp" required />
+              <input
+                name="image"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(event) =>
+                  selectImage(event.target.files?.[0] ?? null)
+                }
+                required
+              />
               <span>＋</span><strong>Choose a landscape image</strong><small>JPG, PNG or WebP · Maximum 8 MB</small>
+              {selectedImage && (
+                <div
+                  className="selected-image-preview"
+                  role="img"
+                  aria-label={`Preview of ${selectedImage.fileName}`}
+                  style={{ backgroundImage: `url("${selectedImage.url}")` }}
+                >
+                  <span>{selectedImage.fileName} · Click to change</span>
+                </div>
+              )}
             </label>
             <label>Slide heading *<Input name="heading" maxLength={70} placeholder="Example: Learning beyond the classroom" required /></label>
             <label>Supporting line<Input name="supporting" maxLength={100} placeholder="Example: Clubs · Sport · Creative arts" /></label>
             <label>Image description *<textarea name="alt" rows={3} maxLength={160} placeholder="Describe what is visible for screen-reader users" required /></label>
-            <Button className="button button-primary" type="submit" disabled={content.heroSlides.length >= 6}>{content.heroSlides.length >= 6 ? "Carousel is full" : "Add image to carousel"}</Button>
+            <Button className="button button-primary" type="submit" disabled={content.heroSlides.length >= 6 || isUploadingImage}>{content.heroSlides.length >= 6 ? "Carousel is full" : isUploadingImage ? "Uploading image…" : "Add image to carousel"}</Button>
           </form>
         </div>
       </section>
@@ -201,11 +225,45 @@ export function AdminLanding({ content, updateContent, notify }: AdminLandingPro
             <div className="dialog-heading"><div><p className="overline">Review changes</p><DialogTitle>Publish landing-page updates?</DialogTitle></div><DialogClose asChild><button type="button" aria-label="Close review">×</button></DialogClose></div>
             <DialogDescription className="sr-only">Review and publish changes to the public landing page.</DialogDescription>
             <div className="change-summary">
-              {changes.length ? changes.map(({ key, label }) => <article key={key}><span>{label}</span><p>{draft[key]}</p></article>) : <p className="no-changes">No changes were made.</p>}
+              {changes.length ? changes.map(({ label, value }) => <article key={label}><span>{label}</span><p>{value}</p></article>) : <p className="no-changes">No changes were made.</p>}
             </div>
             <p className="review-note">Publishing will replace the current landing-page content and make these changes visible on the public prototype.</p>
             <div className="dialog-actions"><DialogClose asChild><Button className="button button-secondary" type="button">Continue editing</Button></DialogClose><Button className="button button-primary" type="submit">Publish changes</Button></div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(pendingSlideDelete)}
+        onOpenChange={(open) => !open && setPendingSlideDelete(null)}
+      >
+        <DialogContent
+          className="admin-dialog confirm-dialog !max-w-[440px] !gap-0 !rounded-[7px] !p-0"
+          showCloseButton={false}
+        >
+          <div className="confirm-dialog-inner">
+            <span className="warning-icon" aria-hidden="true">!</span>
+            <DialogTitle>Remove this carousel image?</DialogTitle>
+            <DialogDescription>
+              {pendingSlideDelete?.heading} will no longer appear on the
+              homepage, and its image will be deleted from Google Drive. This
+              action cannot be undone.
+            </DialogDescription>
+            <div className="dialog-actions">
+              <DialogClose asChild>
+                <Button className="button button-secondary" type="button">
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button
+                className="button button-danger"
+                onClick={() => void removeSlide()}
+                type="button"
+              >
+                Remove
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </>

@@ -14,7 +14,8 @@ Schools, madrashas, and coaching centres share the same routes and features whil
 - Editable landing content and hero carousel
 - Faculty profile management
 - PDF notice and result publishing workflows
-- Browser-persisted prototype content
+- MongoDB-backed website content shared across devices
+- Google Drive image and PDF storage
 - Desktop and mobile Playwright journeys
 - Archived source prototypes for visual comparison
 
@@ -25,6 +26,8 @@ Schools, madrashas, and coaching centres share the same routes and features whil
 - Tailwind CSS 4
 - shadcn/ui and Radix primitives
 - Better Auth with Google OAuth
+- MongoDB Node.js driver
+- Google Drive API with service-account authentication
 - Resend for admission-enquiry email delivery
 - Playwright end-to-end testing
 - pnpm
@@ -39,6 +42,8 @@ Schools, madrashas, and coaching centres share the same routes and features whil
 | `/admin/login` | Google administrator sign-in |
 | `/admin` | Protected content-management workspace |
 | `/api/auth/[...all]` | Better Auth API handler |
+| `/api/content` | Public content reads and protected administrator publishing |
+| `/api/admin/files` | Protected Google Drive image and PDF uploads |
 
 ## Getting started
 
@@ -70,6 +75,11 @@ Open [http://localhost:3000](http://localhost:3000).
 | `GOOGLE_CLIENT_SECRET` | Yes | Google OAuth web-client secret |
 | `GOOGLE_SITE_VERIFICATION` | No | Google Search Console verification token |
 | `ADMIN_EMAILS` | No | Comma-separated administrator email allowlist |
+| `MONGODB_URI` | Publishing | MongoDB or MongoDB Atlas connection string |
+| `MONGODB_DATABASE` | No | Database name; defaults to the database in `MONGODB_URI` |
+| `GOOGLE_CLIENT_EMAIL` | File storage | Google service-account email |
+| `GOOGLE_PRIVATE_KEY` | File storage | Google service-account private key with escaped newlines |
+| `GOOGLE_DRIVE_FOLDER_ID` | File storage | Drive folder shared with the service account |
 | `RESEND_API_KEY` | Admissions | Server-only API key created in Resend |
 | `RESEND_FROM_EMAIL` | Admissions | Sender using a domain verified in Resend, including an optional display name |
 | `ADMISSION_ADMIN_EMAIL` | Admissions | Administrator inbox that receives admission enquiries |
@@ -141,6 +151,53 @@ When `SITE_URL` is absent, EduCanvas falls back to `BETTER_AUTH_URL`, then to `h
 
 When `ADMIN_EMAILS` is empty, any successfully authenticated Google account can access the admin workspace. Better Auth validates sessions on the server and stores stateless session data in encrypted cookies.
 
+## MongoDB content storage
+
+Landing-page content, carousel metadata, faculty profiles, notices, results,
+publication status, and recent activity are stored in MongoDB. EduCanvas keeps
+one versioned content document per selected `SITE_THEME`, so changing the
+environment theme does not overwrite another theme’s content.
+
+For local MongoDB:
+
+```dotenv
+MONGODB_URI=mongodb://localhost:27017/educanvas
+MONGODB_DATABASE=educanvas
+```
+
+For production, use a MongoDB Atlas connection string and allow network access
+from the deployment environment. `MONGODB_URI` is server-only. When the
+database has no content document yet, public pages use the repository’s
+maintained default content; the first administrator publication creates it.
+
+## Google Drive file storage
+
+EduCanvas follows the service-account storage pattern used by the reference
+Book Heaven project:
+
+1. Enable Google Drive API in a Google Cloud project.
+2. Create a service account and private key.
+3. Create a Drive folder and share it with the service-account email as an
+   Editor.
+4. Add the service-account credentials and folder ID:
+
+   ```dotenv
+   GOOGLE_CLIENT_EMAIL=educanvas-storage@example-project.iam.gserviceaccount.com
+   GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+   GOOGLE_DRIVE_FOLDER_ID=your-folder-id
+   ```
+
+Uploaded JPG, PNG, and WebP carousel and faculty images are limited to 8 MB. Published PDFs
+are limited to 10 MB. The server uploads them to the configured folder, grants
+stores the Drive file ID, preview URL, direct URL, filename, and size in
+MongoDB, and delivers files through the application’s guarded asset endpoint.
+Replaced and removed managed assets are deleted
+from Drive. Built-in repository images and legacy notice metadata remain valid.
+
+The Google service-account credentials are separate from the Google OAuth
+client used for administrator login. Never prefix database or storage
+credentials with `NEXT_PUBLIC_`.
+
 ## Admission enquiry email
 
 The landing-page admission form validates submissions on the server and sends
@@ -180,7 +237,8 @@ src/
     faculty/              Faculty directory
     home/                 Landing-page sections and inquiry form
     notices/              Notice and result directory
-    school/               Content domain, defaults, and browser store
+    school/               Content domain, MongoDB repository, and client provider
+    storage/              Google Drive storage adapter and upload client
   lib/                    Better Auth clients and shared utilities
 tests/e2e/                Playwright user journeys
 prototypes/               Archived source prototypes and original assets
@@ -188,11 +246,12 @@ prototypes/               Archived source prototypes and original assets
 
 The feature folders own their components and domain logic. Route files remain thin, shared configuration is centralized, and authentication is enforced at the server-page boundary.
 
-## Content persistence
+## Content publishing
 
-EduCanvas currently operates in prototype mode. Admin changes are saved to browser local storage and immediately reflected by the public client components in the same browser.
-
-For production multi-user content management, replace the browser store in `src/features/school/lib/content-store.ts` with a persistent database or CMS adapter. Authentication is already server-backed and independent from this prototype content store.
+Public pages read content on the server from MongoDB and render it into the
+initial response. Administrator changes are validated and saved through an
+authenticated API before the interface reports success. This makes published
+changes visible across browsers and devices without browser-local state.
 
 ## Quality checks
 
