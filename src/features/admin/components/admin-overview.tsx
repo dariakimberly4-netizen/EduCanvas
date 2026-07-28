@@ -34,6 +34,7 @@ export function AdminOverview({ content, openView }: AdminOverviewProps) {
           <button type="button" onClick={() => openView("faculty")}><span>Faculty</span><h3>Teacher profiles</h3><p>Add or update names, roles, subjects, experience, and profile status.</p><strong>Manage <i>{facultyCount}</i> profiles →</strong></button>
           <button type="button" onClick={() => openView("documents")}><span>Notices</span><h3>School notices</h3><p>Publish examination, holiday, event, and parent notice PDFs.</p><strong>Publish a notice →</strong></button>
           <button type="button" onClick={() => openView("documents")}><span>Results</span><h3>Student results</h3><p>Publish verified term, model test, SSC, and HSC result PDFs.</p><strong>Publish results →</strong></button>
+          <button type="button" onClick={() => openView("enquiries")}><span>Admissions</span><h3>Admission enquiries</h3><p>Review parents and guardians who requested admission information.</p><strong>View requests →</strong></button>
         </div>
       </section>
       <section className="admin-health">

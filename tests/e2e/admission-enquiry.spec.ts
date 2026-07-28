@@ -22,6 +22,25 @@ test("rejects invalid admission data at the API boundary", async ({
   });
 });
 
+test("renders and accepts a valid admission email for Resend delivery", async ({
+  request,
+}) => {
+  const response = await request.post("/api/admission-enquiries", {
+    headers: {
+      "x-e2e-email-token": "playwright-email-delivery-token-2026",
+    },
+    data: {
+      guardianName: "Ayesha Rahman",
+      phone: "+880 1712 000 000",
+      classLevel: "Classes I–V",
+      website: "",
+    },
+  });
+
+  expect(response.status()).toBe(200);
+  await expect(response.json()).resolves.toEqual({ ok: true });
+});
+
 test("shows a useful error when email delivery fails", async ({ page }) => {
   await page.route("**/api/admission-enquiries", async (route) => {
     await route.fulfill({

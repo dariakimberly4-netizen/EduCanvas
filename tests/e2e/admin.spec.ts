@@ -31,6 +31,38 @@ test("renders the authenticated administrator identity", async ({ page }) => {
   ).not.toBeVisible();
 });
 
+test("lists admission information requests in the dashboard", async ({
+  page,
+}) => {
+  const response = await page.request.post("/api/admission-enquiries", {
+    headers: {
+      "x-e2e-email-token": "playwright-email-delivery-token-2026",
+    },
+    data: {
+      guardianName: "Ayesha Rahman",
+      phone: "+880 1712 345 678",
+      classLevel: "Classes VI–X",
+      website: "",
+    },
+  });
+  expect(response.ok()).toBe(true);
+
+  await page.getByRole("link", { name: "Admission enquiries" }).click();
+  await expect(
+    page.getByRole("heading", {
+      name: "Admission enquiries",
+      exact: true,
+    }),
+  ).toBeVisible();
+
+  const enquiry = page
+    .locator(".enquiry-manager-row")
+    .filter({ hasText: "Ayesha Rahman" });
+  await expect(enquiry).toContainText("+880 1712 345 678");
+  await expect(enquiry).toContainText("Classes VI–X");
+  await expect(enquiry).toContainText("Email sent");
+});
+
 test("publishes landing-page content to the public website", async ({ page }) => {
   await page.getByRole("link", { name: "Landing page" }).click();
   await page.getByLabel("Main heading").fill("A complete education, built for every learner.");

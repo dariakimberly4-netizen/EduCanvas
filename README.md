@@ -86,6 +86,14 @@ Open [http://localhost:3000](http://localhost:3000).
 
 Never commit `.env.local` or production credentials. The repository includes only a safe `.env.example`.
 
+Admission information requests are saved in MongoDB's
+`admission_enquiries` collection before EduCanvas attempts email delivery
+through Resend. Administrators can review every request and its email-delivery
+status from **Admin dashboard → Admission enquiries**. The class choices shown
+on the public form come from **Landing page → Admissions content → Class
+options**, so the form and its server-side validation share the same published
+content.
+
 ## Theme selection
 
 Choose the active visual system in `.env.local`:

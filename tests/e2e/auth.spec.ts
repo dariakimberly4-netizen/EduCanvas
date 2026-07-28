@@ -17,4 +17,7 @@ test("rejects unauthenticated content and file mutations", async ({
 
   const fileResponse = await request.post("/api/admin/files");
   expect(fileResponse.status()).toBe(401);
+
+  const enquiriesResponse = await request.get("/api/admission-enquiries");
+  expect(enquiriesResponse.status()).toBe(401);
 });

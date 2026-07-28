@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { resetE2eAdmissionEnquiries } from "@/features/admissions/server/admission-enquiry-repository";
 import { requireAdmin } from "@/features/auth/server/require-admin";
 import { resetE2eSchoolContent } from "@/features/school/server/site-content-repository";
 
@@ -13,6 +14,8 @@ export async function POST() {
   if (!(await requireAdmin())) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
+
+  resetE2eAdmissionEnquiries();
 
   return NextResponse.json({
     ok: true,

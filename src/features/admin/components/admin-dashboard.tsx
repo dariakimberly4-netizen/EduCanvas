@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { Brand } from "@/components/site/brand";
+import { AdminAdmissionEnquiries } from "@/features/admin/components/admin-admission-enquiries";
 import { AdminDocuments } from "@/features/admin/components/admin-documents";
 import { AdminFaculty } from "@/features/admin/components/admin-faculty";
 import { AdminLanding } from "@/features/admin/components/admin-landing";
@@ -18,6 +19,7 @@ const navigation: { view: AdminView; label: string; icon: string }[] = [
   { view: "landing", label: "Landing page", icon: "✎" },
   { view: "faculty", label: "Faculty profiles", icon: "♙" },
   { view: "documents", label: "Notices & results", icon: "□" },
+  { view: "enquiries", label: "Admission enquiries", icon: "✉" },
 ];
 
 export function AdminDashboard({ user }: { user: AdminUser }) {
@@ -88,6 +90,9 @@ export function AdminDashboard({ user }: { user: AdminUser }) {
         </section>
         <section className={`admin-view${view === "documents" ? " active" : ""}`} aria-labelledby="documents-title">
           <AdminDocuments content={content} updateContent={updateContent} notify={showToast} />
+        </section>
+        <section className={`admin-view${view === "enquiries" ? " active" : ""}`} aria-labelledby="enquiries-title">
+          <AdminAdmissionEnquiries />
         </section>
       </main>
 

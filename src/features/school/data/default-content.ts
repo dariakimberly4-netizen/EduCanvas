@@ -1,4 +1,5 @@
 import type { SchoolContent } from "@/features/school/domain/types";
+import { ADMISSION_CLASS_LEVELS } from "@/features/admissions/domain/admission-enquiry";
 
 export const defaultSchoolContent: SchoolContent = {
   landing: {
@@ -77,7 +78,7 @@ export const defaultSchoolContent: SchoolContent = {
     phonePlaceholder: "+880 1XXX XXXXXX",
     classLabel: "Class you are interested in",
     classPlaceholder: "Select a class level",
-    classLevels: ["Playgroup–KG", "Classes I–V", "Classes VI–X", "Classes XI–XII"],
+    classLevels: [...ADMISSION_CLASS_LEVELS],
     inquirySubmitLabel: "Request a call from admissions",
     inquirySubmittingLabel: "Sending enquiry…",
     inquiryReceivedLabel: "Enquiry received",

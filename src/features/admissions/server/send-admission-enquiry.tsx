@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { render } from "@react-email/render";
 import { Resend } from "resend";
 
 import type { AdmissionEnquiry } from "@/features/admissions/domain/admission-enquiry";
@@ -46,28 +47,37 @@ function createPlainTextEmail(
   ].join("\n");
 }
 
+export async function createHtmlEmail(
+  enquiry: AdmissionEnquiry,
+  submittedAt: Date,
+) {
+  return render(
+    <AdmissionEnquiryEmail
+      enquiry={enquiry}
+      submittedAt={submittedAt}
+    />,
+  );
+}
+
 export async function sendAdmissionEnquiry(
   enquiry: AdmissionEnquiry,
   options: SendAdmissionEnquiryOptions = {},
 ) {
+  const submittedAt = new Date();
+  const html = await createHtmlEmail(enquiry, submittedAt);
+
   if (options.skipDelivery) {
     return { id: "e2e-delivery-bypassed" };
   }
 
   const { apiKey, from, adminEmail } = getEmailConfiguration();
-  const submittedAt = new Date();
   const resend = new Resend(apiKey);
   const { data, error } = await resend.emails.send(
     {
       from,
       to: [adminEmail],
       subject: `Admission enquiry: ${enquiry.guardianName} · ${enquiry.classLevel}`,
-      react: (
-        <AdmissionEnquiryEmail
-          enquiry={enquiry}
-          submittedAt={submittedAt}
-        />
-      ),
+      html,
       text: createPlainTextEmail(enquiry, submittedAt),
       tags: [{ name: "category", value: "admission-enquiry" }],
     },

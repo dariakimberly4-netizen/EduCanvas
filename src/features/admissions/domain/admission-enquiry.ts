@@ -10,7 +10,15 @@ export type AdmissionClassLevel = (typeof ADMISSION_CLASS_LEVELS)[number];
 export interface AdmissionEnquiry {
   guardianName: string;
   phone: string;
-  classLevel: AdmissionClassLevel;
+  classLevel: string;
+}
+
+export type AdmissionDeliveryStatus = "pending" | "delivered" | "failed";
+
+export interface AdmissionEnquiryRecord extends AdmissionEnquiry {
+  id: string;
+  submittedAt: string;
+  deliveryStatus: AdmissionDeliveryStatus;
 }
 
 export interface AdmissionEnquiryFieldErrors {
@@ -39,6 +47,7 @@ function readString(
 
 export function parseAdmissionEnquiry(
   input: unknown,
+  allowedClassLevels: readonly string[] = ADMISSION_CLASS_LEVELS,
 ): AdmissionEnquiryParseResult {
   if (!input || typeof input !== "object" || Array.isArray(input)) {
     return {
@@ -70,11 +79,7 @@ export function parseAdmissionEnquiry(
     fieldErrors.phone = "Enter a valid phone number.";
   }
 
-  if (
-    !ADMISSION_CLASS_LEVELS.includes(
-      classLevel as AdmissionClassLevel,
-    )
-  ) {
+  if (!allowedClassLevels.includes(classLevel)) {
     fieldErrors.classLevel = "Select a valid class level.";
   }
 
@@ -87,7 +92,7 @@ export function parseAdmissionEnquiry(
     data: {
       guardianName,
       phone,
-      classLevel: classLevel as AdmissionClassLevel,
+      classLevel,
     },
     isSpam: website.length > 0,
   };
