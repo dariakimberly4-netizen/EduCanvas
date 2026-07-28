@@ -70,7 +70,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `SITE_THEME` | No | `school`, `madrasha`, or `coaching`; defaults to `school` |
 | `SITE_URL` | Production | Public origin used for canonical, sitemap, and social-preview URLs |
 | `BETTER_AUTH_SECRET` | Yes | Random secret containing at least 32 characters |
-| `BETTER_AUTH_URL` | Yes | Application origin, such as `http://localhost:3000` |
+| `BETTER_AUTH_URL` | Yes | Authentication origin; keep it identical to `SITE_URL` |
 | `GOOGLE_CLIENT_ID` | Yes | Google OAuth web-client ID |
 | `GOOGLE_CLIENT_SECRET` | Yes | Google OAuth web-client secret |
 | `GOOGLE_SITE_VERIFICATION` | No | Google Search Console verification token |
@@ -133,7 +133,10 @@ Set the deployed public origin before building:
 SITE_URL=https://your-domain.example
 ```
 
-When `SITE_URL` is absent, EduCanvas falls back to `BETTER_AUTH_URL`, then to `http://localhost:3000`. Search engines must never receive a production build containing a localhost origin.
+`SITE_URL` is the canonical production origin for both SEO and authentication.
+When it is absent, EduCanvas falls back to `BETTER_AUTH_URL`, then to
+`http://localhost:3000` for SEO. Search engines and Google OAuth must never
+receive a production build containing a localhost origin.
 
 ## Google authentication
 
@@ -150,7 +153,7 @@ When `SITE_URL` is absent, EduCanvas falls back to `BETTER_AUTH_URL`, then to `h
    https://your-domain.example/api/auth/callback/google
    ```
 
-4. Configure `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `BETTER_AUTH_URL`, and `BETTER_AUTH_SECRET`.
+4. Configure `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `BETTER_AUTH_URL`, and `BETTER_AUTH_SECRET`. Set both `SITE_URL` and `BETTER_AUTH_URL` to the same public HTTPS origin in production.
 5. Optionally restrict access with:
 
    ```dotenv
