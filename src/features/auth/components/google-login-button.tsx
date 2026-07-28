@@ -6,16 +6,27 @@ import { GoogleMark } from "@/features/auth/components/google-mark";
 import { authClient } from "@/lib/auth-client";
 
 interface GoogleLoginButtonProps {
+  authOrigin?: string;
   unauthorized?: boolean;
 }
 
-export function GoogleLoginButton({ unauthorized = false }: GoogleLoginButtonProps) {
+export function GoogleLoginButton({
+  authOrigin,
+  unauthorized = false,
+}: GoogleLoginButtonProps) {
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function signIn() {
     setIsPending(true);
     setError(null);
+
+    if (authOrigin && window.location.origin !== authOrigin) {
+      const canonicalLoginURL = new URL("/admin/login", authOrigin);
+      canonicalLoginURL.searchParams.set("error", "origin-mismatch");
+      window.location.assign(canonicalLoginURL);
+      return;
+    }
 
     try {
       const result = await authClient.signIn.social({

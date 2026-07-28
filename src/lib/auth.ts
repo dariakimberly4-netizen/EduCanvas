@@ -1,12 +1,16 @@
 import { betterAuth } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
 
+import { authBaseURL, authErrorURL } from "@/config/auth";
 import { recordAuthenticationActivity } from "@/features/school/server/activity-repository";
 
 export const auth = betterAuth({
   appName: "EduCanvas",
-  baseURL: process.env.BETTER_AUTH_URL,
+  baseURL: authBaseURL,
   secret: process.env.BETTER_AUTH_SECRET,
+  onAPIError: {
+    errorURL: authErrorURL,
+  },
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",

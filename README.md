@@ -159,6 +159,14 @@ When `SITE_URL` is absent, EduCanvas falls back to `BETTER_AUTH_URL`, then to `h
 
 When `ADMIN_EMAILS` is empty, any successfully authenticated Google account can access the admin workspace. Better Auth validates sessions on the server and stores stateless session data in encrypted cookies.
 
+Always open the application using the exact origin configured in
+`BETTER_AUTH_URL`. For example, do not mix `localhost` and `127.0.0.1` during a
+Google sign-in attempt. OAuth state cookies are host-only, so changing the
+protocol, hostname, or port between starting sign-in and Google's callback
+causes a secure `state_mismatch` rejection. If this happens, allow cookies for
+the site, close other active sign-in tabs, and restart login from the configured
+origin.
+
 ## MongoDB content storage
 
 Landing-page content, carousel metadata, faculty profiles, notices, results,

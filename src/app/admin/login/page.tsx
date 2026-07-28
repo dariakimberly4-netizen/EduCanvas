@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { Brand } from "@/components/site/brand";
+import { authOrigin } from "@/config/auth";
 import { GoogleLoginButton } from "@/features/auth/components/google-login-button";
 import {
   getAuthenticatedAdminUser,
@@ -12,7 +13,7 @@ import { generatePrivatePageMetadata } from "@/lib/seo/metadata";
 export const metadata = generatePrivatePageMetadata("Staff login");
 
 interface AdminLoginPageProps {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string | string[] }>;
 }
 
 export default async function AdminLoginPage({ searchParams }: AdminLoginPageProps) {
@@ -24,6 +25,8 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
   if (user && isAuthorizedAdmin(user.email)) {
     redirect("/admin");
   }
+
+  const error = Array.isArray(params.error) ? params.error[0] : params.error;
 
   return (
     <main className="auth-page">
@@ -43,8 +46,24 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
           <p className="overline">Administrator access</p>
           <h2>Sign in to continue</h2>
           <p className="auth-intro">Use the Google account approved for school administration.</p>
-          <GoogleLoginButton unauthorized={params.error === "not-authorized"} />
-          {params.error === "google" ? (
+          <GoogleLoginButton
+            authOrigin={authOrigin}
+            unauthorized={error === "not-authorized"}
+          />
+          {error === "origin-mismatch" ? (
+            <p className="auth-error" role="alert">
+              Google sign-in must start from this website address. You are now
+              at the correct address; try again.
+            </p>
+          ) : null}
+          {error === "state_mismatch" ||
+          error === "state_security_mismatch" ? (
+            <p className="auth-error" role="alert">
+              Your sign-in cookie was not returned. Allow cookies for this
+              website, close any other Google sign-in tabs, and try again.
+            </p>
+          ) : null}
+          {error === "google" ? (
             <p className="auth-error" role="alert">
               Google could not complete sign-in. Try again or contact the site administrator.
             </p>
