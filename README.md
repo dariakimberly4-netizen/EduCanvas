@@ -135,7 +135,9 @@ defaults provide a read-only fallback when MongoDB is not configured.
 
 - Node.js 20.19 or newer
 - pnpm 11 or newer
-- A Google OAuth web client for administrator login
+- MongoDB running locally, or a reachable MongoDB Atlas database, when using
+  the copied `.env.example` configuration
+- A Google OAuth web client only when evaluating administrator login
 
 ### Installation
 
@@ -144,6 +146,26 @@ git clone https://github.com/montasim/EduCanvas.git
 cd EduCanvas
 pnpm install
 cp .env.example .env.local
+```
+
+The copied template points `MONGODB_URI` to
+`mongodb://localhost:27017/educanvas`. Before starting EduCanvas, choose one
+setup:
+
+- **Full local workflow:** start a local MongoDB server on port `27017`, or
+  replace `MONGODB_URI` with a reachable MongoDB Atlas connection string.
+- **Read-only public evaluation:** remove or comment out `MONGODB_URI` and
+  `MONGODB_DATABASE` in `.env.local`. Public pages then use maintained
+  repository defaults, but publishing and admission-enquiry storage are
+  unavailable.
+
+Do not leave the template's localhost URI enabled when no local MongoDB server
+is running. A non-empty URI is treated as configured, so connection attempts
+will fail instead of selecting the no-database fallback.
+
+Start the application:
+
+```bash
 pnpm dev
 ```
 
