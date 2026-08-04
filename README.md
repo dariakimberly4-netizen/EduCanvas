@@ -3,6 +3,7 @@
 **Launch and maintain a school, madrasha, or coaching-centre website from one shared application.**
 
 [![Support on SupportKori](https://img.shields.io/badge/support-SupportKori-ffdd00)](https://www.supportkori.com/montasim)
+[![Live school theme](https://img.shields.io/badge/live-schoolcanvas.netlify.app-00c7b7?logo=netlify)](https://schoolcanvas.netlify.app)
 
 EduCanvas is a theme-driven website and content-management starter for educational institutions. A single modular Next.js application powers a public landing page, faculty directory, notices and results, admission enquiries, and a Google-protected administration workspace.
 
@@ -11,7 +12,18 @@ Schools, madrashas, and coaching centres share the same routes and features whil
 > **Project status:** EduCanvas is a deployable starter rather than a hosted
 > multi-tenant service. Clone it for one institution, configure its canonical
 > URL and integrations, select a theme, then deploy that configured instance.
-> No public demonstration deployment is currently linked from this repository.
+> The linked deployment demonstrates the school theme; each adopter owns the
+> accuracy, access policy, and operations of its configured institution.
+
+**[Open the live school theme](https://schoolcanvas.netlify.app) · [Browse faculty](https://schoolcanvas.netlify.app/faculty) · [View notices and results](https://schoolcanvas.netlify.app/notices)**
+
+## Why EduCanvas?
+
+Small educational institutions often assemble a public website, document
+archive, enquiry form, and content editor from separate systems. That raises
+maintenance cost and lets branding or information drift between pages.
+EduCanvas keeps those workflows in one typed application while allowing the
+same implementation to take on three distinct institutional identities.
 
 ## Who it is for
 
@@ -30,7 +42,7 @@ services.
 ## Highlights
 
 - Three responsive institutional themes selected through `.env`
-- Public landing page, faculty directory, notices, and verified results
+- Public landing page, faculty directory, notices, and results
 - Authenticated administration workspace
 - Google OAuth through Better Auth
 - Optional administrator email allowlist
@@ -41,6 +53,36 @@ services.
 - Google Drive image and PDF storage
 - Desktop and mobile Playwright journeys
 - Archived source prototypes for visual comparison
+
+## Using EduCanvas
+
+### As a visitor
+
+1. Open the institution's home page for its current story, facilities,
+   admission information, and contact details.
+2. Browse **Faculty** and filter the teaching and leadership directory.
+3. Open **Notices & results**, then search or filter published documents.
+4. Submit the admission enquiry form with a guardian name, phone number, and
+   class choice when the institution has enabled that workflow.
+
+### As an administrator
+
+1. Open `/admin/login` on the exact canonical origin and sign in with Google.
+2. Confirm that the signed-in address belongs to `ADMIN_EMAILS` when an
+   allowlist is configured.
+3. Edit landing-page sections or the hero carousel and publish reviewed
+   content.
+4. Add or update faculty profiles, notices, and results; upload supported
+   images or PDFs when Drive storage is configured.
+5. Review recent publishing activity and admission enquiries in the dashboard.
+6. Confirm the public route after each publication.
+
+### As a developer
+
+Clone the starter, select one `SITE_THEME`, configure the canonical URL and
+only the integrations required by the institution, then follow the local and
+deployment checklists below. Do not enable production administration with an
+empty `ADMIN_EMAILS` value unintentionally.
 
 ## Technology
 
@@ -127,6 +169,11 @@ Open [http://localhost:3000](http://localhost:3000).
 | `RESEND_API_KEY` | Admissions | Server-only API key created in Resend |
 | `RESEND_FROM_EMAIL` | Admissions | Sender using a domain verified in Resend, including an optional display name |
 | `ADMISSION_ADMIN_EMAIL` | Admissions | Administrator inbox that receives admission enquiries |
+
+The Playwright harness also sets `E2E_CONTENT_STORE`,
+`E2E_AUTH_BYPASS_TOKEN`, and `E2E_EMAIL_BYPASS_TOKEN` for isolated test
+fixtures. They are not production configuration and must never be enabled in a
+deployed institution.
 
 Never commit `.env.local` or production credentials. The repository includes only a safe `.env.example`.
 
@@ -319,6 +366,17 @@ changes visible across browsers and devices without browser-local state.
 
 ## Quality checks
 
+| Command | Purpose |
+| --- | --- |
+| `pnpm dev` | Start the Next.js development server |
+| `pnpm build` | Create a production build |
+| `pnpm start` | Serve the production build |
+| `pnpm lint` | Run ESLint |
+| `pnpm typecheck` | Check TypeScript without emitting files |
+| `pnpm test:e2e` | Run the Playwright journey suite against an existing production build |
+
+Run the complete sequence in this order:
+
 ```bash
 pnpm lint
 pnpm typecheck
@@ -343,8 +401,10 @@ Admin editing journeys run in the desktop workspace. Public and authentication j
 
 ## Deployment
 
-EduCanvas has no provider-specific deployment file. Deploy it on a Node.js host
-that supports Next.js 16, then configure:
+The maintained school-theme deployment runs at
+[schoolcanvas.netlify.app](https://schoolcanvas.netlify.app). The repository has
+no provider-specific deployment file, so deploy another instance on a Node.js
+host that supports Next.js 16, then configure:
 
 1. `SITE_URL` and `BETTER_AUTH_URL` to the same canonical HTTPS origin.
 2. The production Google OAuth callback at
@@ -384,6 +444,19 @@ The original static prototypes remain available for reference:
 
 These files are historical references. The maintained application lives under `src/`.
 
+## Documentation
+
+- [Environment reference](#environment-variables)
+- [Theme selection](#theme-selection)
+- [SEO and social previews](#seo-and-social-previews)
+- [Google authentication](#google-authentication)
+- [MongoDB content storage](#mongodb-content-storage)
+- [Google Drive file storage](#google-drive-file-storage)
+- [Admission enquiry email](#admission-enquiry-email)
+- [Content publishing](#content-publishing)
+- [Quality checks](#quality-checks)
+- [Archived visual prototypes](#archived-prototypes)
+
 ## Contributing, security, and support
 
 Open focused issues or pull requests with the affected theme and workflow,
@@ -395,6 +468,21 @@ Report sensitive vulnerabilities privately through the contact links on
 [the maintainer's GitHub profile](https://github.com/montasim). Optional support
 through [SupportKori](https://www.supportkori.com/montasim) helps fund continued
 maintenance.
+
+The repository currently has no dedicated `CONTRIBUTING.md`, `SECURITY.md`,
+`CODE_OF_CONDUCT.md`, or `SUPPORT.md`. Use
+[Issues](https://github.com/montasim/EduCanvas/issues) for public reports,
+[Pull Requests](https://github.com/montasim/EduCanvas/pulls) for reviewable
+changes, and the maintainer's profile for private security or personal-data
+reports.
+
+## Funding
+
+Optional SupportKori contributions help fund theme maintenance, integration
+testing, and deployment research. Documentation, accessibility review, and
+reproducible bug reports are equally valuable.
+
+[![Support EduCanvas on SupportKori](https://img.shields.io/badge/Support_EduCanvas-SupportKori-00B8B5?style=for-the-badge)](https://www.supportkori.com/montasim)
 
 ## License
 
