@@ -1,8 +1,31 @@
 # EduCanvas
 
-EduCanvas is a theme-driven website and content-management starter for educational institutions. A single modular Next.js application powers a public landing page, faculty directory, notices and results, and a Google-protected administration workspace.
+**Launch and maintain a school, madrasha, or coaching-centre website from one shared application.**
+
+[![Support on SupportKori](https://img.shields.io/badge/support-SupportKori-ffdd00)](https://www.supportkori.com/montasim)
+
+EduCanvas is a theme-driven website and content-management starter for educational institutions. A single modular Next.js application powers a public landing page, faculty directory, notices and results, admission enquiries, and a Google-protected administration workspace.
 
 Schools, madrashas, and coaching centres share the same routes and features while selecting their visual identity through one environment variable.
+
+> **Project status:** EduCanvas is a deployable starter rather than a hosted
+> multi-tenant service. Clone it for one institution, configure its canonical
+> URL and integrations, select a theme, then deploy that configured instance.
+> No public demonstration deployment is currently linked from this repository.
+
+## Who it is for
+
+- **Institution staff** who need to publish landing-page content, faculty
+  profiles, notices, results, and admission information without editing code.
+- **Developers and agencies** who want one maintained codebase that can be
+  branded for a school, madrasha, or coaching centre.
+- **Visitors and guardians** who need current institutional information,
+  searchable documents, faculty details, and an admission-enquiry path.
+
+The shortest path to evaluate the starter is the local setup below. It renders
+maintained default content even before MongoDB is configured; publishing,
+authentication, uploads, and enquiry delivery require their corresponding
+services.
 
 ## Highlights
 
@@ -32,6 +55,25 @@ Schools, madrashas, and coaching centres share the same routes and features whil
 - Playwright end-to-end testing
 - pnpm
 
+## Architecture
+
+```mermaid
+flowchart LR
+  Theme[SITE_THEME] --> Public[Public Next.js pages]
+  Admin[Google-authenticated admin] --> API[Protected content APIs]
+  API --> Mongo[(MongoDB content)]
+  API --> Drive[Google Drive assets]
+  Public --> Enquiry[Admission enquiry API]
+  Enquiry --> Mongo
+  Enquiry --> Resend[Resend email]
+  Mongo --> Public
+```
+
+Public pages render content on the server. Each configured theme owns one
+versioned MongoDB content document. Protected API routes validate administrator
+sessions before publishing content or managing Drive assets, while repository
+defaults provide a read-only fallback when MongoDB is not configured.
+
 ## Routes
 
 | Route | Purpose |
@@ -49,13 +91,15 @@ Schools, madrashas, and coaching centres share the same routes and features whil
 
 ### Requirements
 
-- Node.js 20.9 or newer
+- Node.js 20.19 or newer
 - pnpm 11 or newer
 - A Google OAuth web client for administrator login
 
 ### Installation
 
 ```bash
+git clone https://github.com/montasim/EduCanvas.git
+cd EduCanvas
 pnpm install
 cp .env.example .env.local
 pnpm dev
@@ -206,10 +250,11 @@ Book Heaven project:
    GOOGLE_DRIVE_FOLDER_ID=your-folder-id
    ```
 
-Uploaded JPG, PNG, and WebP carousel and faculty images are limited to 8 MB. Published PDFs
-are limited to 10 MB. The server uploads them to the configured folder, grants
-stores the Drive file ID, preview URL, direct URL, filename, and size in
-MongoDB, and delivers files through the application’s guarded asset endpoint.
+Uploaded JPG, PNG, and WebP carousel and faculty images are limited to 8 MB.
+Published PDFs are limited to 10 MB. The server uploads them to the configured
+folder, grants the required file access, stores the Drive file ID, preview URL,
+direct URL, filename, and size in MongoDB, and delivers files through the
+application’s guarded asset endpoint.
 Replaced and removed managed assets are deleted
 from Drive. Built-in repository images and legacy notice metadata remain valid.
 
@@ -296,6 +341,39 @@ The Playwright suite covers:
 
 Admin editing journeys run in the desktop workspace. Public and authentication journeys run at desktop and Pixel 7 viewports.
 
+## Deployment
+
+EduCanvas has no provider-specific deployment file. Deploy it on a Node.js host
+that supports Next.js 16, then configure:
+
+1. `SITE_URL` and `BETTER_AUTH_URL` to the same canonical HTTPS origin.
+2. The production Google OAuth callback at
+   `/api/auth/callback/google` on that origin.
+3. MongoDB, Google Drive, and Resend credentials for the workflows you enable.
+4. `ADMIN_EMAILS` before launch if administration must be restricted to named
+   accounts.
+5. `SITE_THEME`, followed by a fresh production build.
+
+Run `pnpm lint`, `pnpm typecheck`, `pnpm build`, and the relevant Playwright
+journeys before promoting a deployment.
+
+## Operational limitations
+
+- When `ADMIN_EMAILS` is empty, every Google account that successfully signs in
+  can access the administration workspace. Production deployments should make
+  that choice explicitly.
+- Without `MONGODB_URI`, public pages fall back to repository defaults, but
+  administrators cannot persist published content.
+- File uploads and managed-asset cleanup depend on Google Drive service-account
+  access to the configured folder.
+- Admission enquiries are stored before email delivery is attempted. Operators
+  should define retention, access, and deletion policies for guardian contact
+  details.
+- Changing `SITE_THEME` selects a different content document and requires a
+  rebuild; it does not convert an existing institution into a multi-tenant app.
+- Notices, results, staff profiles, and admission copy are maintained by the
+  deploying institution. EduCanvas does not independently verify them.
+
 ## Archived prototypes
 
 The original static prototypes remain available for reference:
@@ -305,3 +383,25 @@ The original static prototypes remain available for reference:
 - `prototypes/coacing/` — Vertex Coaching Academy
 
 These files are historical references. The maintained application lives under `src/`.
+
+## Contributing, security, and support
+
+Open focused issues or pull requests with the affected theme and workflow,
+reproduction steps, and the checks performed. Keep credentials, admission
+submissions, administrator identities, Drive file IDs, and private institutional
+data out of issues and test fixtures.
+
+Report sensitive vulnerabilities privately through the contact links on
+[the maintainer's GitHub profile](https://github.com/montasim). Optional support
+through [SupportKori](https://www.supportkori.com/montasim) helps fund continued
+maintenance.
+
+## License
+
+This repository does not currently include a license file. Copyright remains
+with the author, and no open-source license should be assumed. Institution
+logos, photographs, documents, and prototype assets may have separate rights.
+
+## Maintainer
+
+[Mohammad Montasim Al Mamun Shuvo](https://github.com/montasim)
