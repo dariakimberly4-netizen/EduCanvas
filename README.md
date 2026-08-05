@@ -4,6 +4,8 @@ EduCanvas is a theme-driven website and content-management starter for education
 
 Schools, madrashas, and coaching centres share the same routes and features while selecting their institution and public layout through environment variables.
 
+**Live demos:** [School](https://schoolcanvas.netlify.app) · [Madrasha](https://madrashacanvas.netlify.app) · [Coaching](https://coachingcanvasn.netlify.app)
+
 ## Highlights
 
 - Three institutional identities and five responsive visual layouts selected through `.env`
@@ -310,8 +312,20 @@ Admin editing journeys run in the desktop workspace. Public and authentication j
 
 The original static prototypes remain available for reference:
 
-- `prototypes/school/` — Shapla Grove School & College
-- `prototypes/madrasha/` — Noorul Ilm Madrasha & Islamic Academy
-- `prototypes/coacing/` — Vertex Coaching Academy
+- `prototypes/school/v1-v5/` — Shapla Grove School & College
+- `prototypes/madrasha/v1-v5/` — Noorul Ilm Madrasha & Islamic Academy
+- `prototypes/coacing/v1-v5/` — Vertex Coaching Academy
 
 These files are historical references. The maintained application lives under `src/`.
+
+## Project status and limitations
+
+EduCanvas is a working application starter with public demo deployments. The demos contain representative institutional content and should not be treated as a production school record system. Production use requires correctly configured authentication, MongoDB, Google Drive, email delivery, backups, access controls, and privacy procedures appropriate to the institution.
+
+## Support and contribution
+
+Use [GitHub Issues](https://github.com/montasim/EduCanvas/issues) for reproducible bugs and feature requests. Pull requests are welcome. Do not include credentials, student records, private contact information, or other sensitive data in public issues.
+
+## License
+
+This repository does not currently include a license file. No open-source license or reuse permission should be assumed until the repository owner adds one.
