@@ -15,6 +15,7 @@ test("home page presents the complete school journey", async ({ page }) => {
   });
 
   await expect(page.locator("html")).toHaveAttribute("data-theme", /^(school|madrasha|coaching)$/);
+  await expect(page.locator("html")).toHaveAttribute("data-visual-theme", /^(heritage|fieldbook|night-school|common-room|ledger)$/);
   await expect(page.getByRole("heading", { name: "A complete education from Playgroup to Class XII." })).toBeVisible();
   await expect(page.getByRole("img", { name: /students walking through the school courtyard/i })).toBeVisible();
   await expect(page.getByText("School at a glance")).toBeVisible();

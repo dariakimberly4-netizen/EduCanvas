@@ -2,11 +2,11 @@
 
 EduCanvas is a theme-driven website and content-management starter for educational institutions. A single modular Next.js application powers a public landing page, faculty directory, notices and results, and a Google-protected administration workspace.
 
-Schools, madrashas, and coaching centres share the same routes and features while selecting their visual identity through one environment variable.
+Schools, madrashas, and coaching centres share the same routes and features while selecting their institution and public layout through environment variables.
 
 ## Highlights
 
-- Three responsive institutional themes selected through `.env`
+- Three institutional identities and five responsive visual layouts selected through `.env`
 - Public landing page, faculty directory, notices, and verified results
 - Authenticated administration workspace
 - Google OAuth through Better Auth
@@ -68,6 +68,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | Variable | Required | Description |
 | --- | --- | --- |
 | `SITE_THEME` | No | `school`, `madrasha`, or `coaching`; defaults to `school` |
+| `SITE_VISUAL_THEME` | No | `heritage`, `fieldbook`, `night-school`, `common-room`, or `ledger`; defaults to `heritage` |
 | `SITE_URL` | Production | Public origin used for canonical, sitemap, and social-preview URLs |
 | `BETTER_AUTH_SECRET` | Yes | Random secret containing at least 32 characters |
 | `BETTER_AUTH_URL` | Yes | Authentication origin; keep it identical to `SITE_URL` |
@@ -96,13 +97,14 @@ content.
 
 ## Theme selection
 
-Choose the active visual system in `.env.local`:
+Choose the institution and public visual system in `.env.local`:
 
 ```dotenv
 SITE_THEME=coaching
+SITE_VISUAL_THEME=common-room
 ```
 
-Supported values:
+Institution values:
 
 - `school` — formal blue school and college theme
 - `madrasha` — restrained green, gold, and Arabic-influenced theme
@@ -110,7 +112,15 @@ Supported values:
 
 The archived coaching prototype directory retains its original `prototypes/coacing` spelling, but the recommended environment value is `coaching`. The misspelled `coacing` value is also accepted as a compatibility alias.
 
-Theme resolution is centralized in `src/config/site-theme.ts`. The root layout renders a `data-theme` attribute before the page reaches the browser, preventing a flash of the default theme. `src/app/themes.css` contains isolated theme overrides while routes, components, authentication, and workflows stay shared.
+Visual layout values:
+
+- `heritage` - the original v1 institutional layout
+- `fieldbook` - the sharp editorial v2 layout
+- `night-school` - the dark sidebar v3 application layout
+- `common-room` - the soft, rounded v4 campus portal
+- `ledger` - the minimal, information-first v5 layout
+
+Aliases `v1` through `v5` are accepted, but named values are preferred. Institution resolution is centralized in `src/config/site-theme.ts`; visual layout resolution lives in `src/config/site-visual-theme.ts`. The root layout renders both `data-theme` and `data-visual-theme` before the page reaches the browser, preventing a flash of a fallback theme. `src/app/themes.css` owns institution tokens and `src/app/visual-themes.css` owns layout composition. Routes, content, authentication, admin UI, and publishing workflows stay shared.
 
 Restart the development server after changing the theme. Production deployments must be rebuilt.
 
