@@ -103,9 +103,19 @@ administration with an empty `ADMIN_EMAILS` value unintentionally.
 ## Architecture
 
 ```mermaid
-flowchart LR
-  Identity[SITE_THEME] --> Public[Public Next.js pages]
-  Layout[SITE_VISUAL_THEME] --> Public
+flowchart TD
+  Env[.env.local] --> Identity[SITE_THEME]
+  Env --> Layout[SITE_VISUAL_THEME]
+  Identity --> IdentityConfig[src/config/site-theme.ts]
+  Layout --> LayoutConfig[src/config/site-visual-theme.ts]
+  IdentityConfig --> ThemeAttribute[data-theme]
+  IdentityConfig --> ContentKey[Theme-specific MongoDB content]
+  LayoutConfig --> LayoutAttribute[data-visual-theme]
+  ThemeAttribute --> ThemeCSS[src/app/themes.css]
+  LayoutAttribute --> LayoutCSS[src/app/visual-themes.css]
+  ThemeCSS --> Public[Shared public Next.js pages]
+  LayoutCSS --> Public
+  ContentKey --> Public
   Admin[Google-authenticated admin] --> API[Protected content APIs]
   API --> Mongo[(MongoDB content)]
   API --> Drive[Google Drive assets]
@@ -115,10 +125,25 @@ flowchart LR
   Mongo --> Public
 ```
 
-Public pages render content on the server. Each configured theme owns one
-versioned MongoDB content document. Protected API routes validate administrator
-sessions before publishing content or managing Drive assets, while repository
-defaults provide a read-only fallback when MongoDB is not configured.
+EduCanvas resolves two independent theme axes on the server. `SITE_THEME`
+selects the institution identity, design tokens, default content, SEO identity,
+and versioned MongoDB content document. `SITE_VISUAL_THEME` selects the public
+page composition without changing routes, content, authentication, the admin
+workspace, or publishing workflows.
+
+`src/app/layout.tsx` applies the resolved values as `data-theme` and
+`data-visual-theme` before the page reaches the browser. Institution tokens live
+in `src/app/themes.css`; layout composition lives in
+`src/app/visual-themes.css`. This keeps all 15 institution-and-layout
+combinations on the same component tree and prevents a flash of a fallback
+theme.
+
+Public pages render content on the server. Protected API routes validate
+administrator sessions before publishing content or managing Drive assets,
+while repository defaults provide a read-only fallback when MongoDB is not
+configured. Changing either theme variable requires restarting development or
+rebuilding the production deployment; neither variable is a browser-side
+multi-tenant selector.
 
 ## Routes
 
