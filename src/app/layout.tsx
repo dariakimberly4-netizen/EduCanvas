@@ -22,8 +22,10 @@ import "@fontsource/ibm-plex-mono/latin-500.css";
 import "@fontsource/ibm-plex-mono/latin-600.css";
 import "./globals.css";
 import "./themes.css";
+import "./visual-themes.css";
 
 import { activeSiteTheme } from "@/config/site-theme";
+import { activeSiteVisualTheme } from "@/config/site-visual-theme";
 import { THEME_BRAND } from "@/config/theme-brand";
 import { generateRootMetadata } from "@/lib/seo/metadata";
 
@@ -36,7 +38,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" data-theme={activeSiteTheme}>
+    <html
+      lang="en"
+      data-theme={activeSiteTheme}
+      data-visual-theme={activeSiteVisualTheme}
+    >
       <body>{children}</body>
     </html>
   );

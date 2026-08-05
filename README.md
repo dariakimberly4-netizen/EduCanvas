@@ -7,13 +7,16 @@
 
 EduCanvas is a theme-driven website and content-management starter for educational institutions. A single modular Next.js application powers a public landing page, faculty directory, notices and results, admission enquiries, and a Google-protected administration workspace.
 
-Schools, madrashas, and coaching centres share the same routes and features while selecting their visual identity through one environment variable.
+Schools, madrashas, and coaching centres share the same routes and features while selecting their institution and public layout through environment variables.
+
+**Live demos:** [School](https://schoolcanvas.netlify.app) · [Madrasha](https://madrashacanvas.netlify.app) · [Coaching](https://coachingcanvasn.netlify.app)
 
 > **Project status:** EduCanvas is a deployable starter rather than a hosted
 > multi-tenant service. Clone it for one institution, configure its canonical
-> URL and integrations, select a theme, then deploy that configured instance.
-> The linked deployment demonstrates the school theme; each adopter owns the
-> accuracy, access policy, and operations of its configured institution.
+> URL and integrations, select an institution and layout, then deploy that
+> configured instance. The linked deployments demonstrate all three institution
+> identities; each adopter owns the accuracy, access policy, and operations of
+> its configured institution.
 
 **[Open the live school theme](https://schoolcanvas.netlify.app) · [Browse faculty](https://schoolcanvas.netlify.app/faculty) · [View notices and results](https://schoolcanvas.netlify.app/notices)**
 
@@ -41,8 +44,8 @@ services.
 
 ## Highlights
 
-- Three responsive institutional themes selected through `.env`
-- Public landing page, faculty directory, notices, and results
+- Three institutional identities and five responsive visual layouts selected through `.env`
+- Public landing page, faculty directory, notices, and verified results
 - Authenticated administration workspace
 - Google OAuth through Better Auth
 - Optional administrator email allowlist
@@ -79,10 +82,10 @@ services.
 
 ### As a developer
 
-Clone the starter, select one `SITE_THEME`, configure the canonical URL and
-only the integrations required by the institution, then follow the local and
-deployment checklists below. Do not enable production administration with an
-empty `ADMIN_EMAILS` value unintentionally.
+Clone the starter, select one `SITE_THEME` and one `SITE_VISUAL_THEME`, configure
+the canonical URL and only the integrations required by the institution, then
+follow the local and deployment checklists below. Do not enable production
+administration with an empty `ADMIN_EMAILS` value unintentionally.
 
 ## Technology
 
@@ -101,7 +104,8 @@ empty `ADMIN_EMAILS` value unintentionally.
 
 ```mermaid
 flowchart LR
-  Theme[SITE_THEME] --> Public[Public Next.js pages]
+  Identity[SITE_THEME] --> Public[Public Next.js pages]
+  Layout[SITE_VISUAL_THEME] --> Public
   Admin[Google-authenticated admin] --> API[Protected content APIs]
   API --> Mongo[(MongoDB content)]
   API --> Drive[Google Drive assets]
@@ -176,6 +180,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | Variable | Required | Description |
 | --- | --- | --- |
 | `SITE_THEME` | No | `school`, `madrasha`, or `coaching`; defaults to `school` |
+| `SITE_VISUAL_THEME` | No | `heritage`, `fieldbook`, `night-school`, `common-room`, or `ledger`; defaults to `heritage` |
 | `SITE_URL` | Production | Public origin used for canonical, sitemap, and social-preview URLs |
 | `BETTER_AUTH_SECRET` | Yes | Random secret containing at least 32 characters |
 | `BETTER_AUTH_URL` | Yes | Authentication origin; keep it identical to `SITE_URL` |
@@ -209,13 +214,14 @@ content.
 
 ## Theme selection
 
-Choose the active visual system in `.env.local`:
+Choose the institution and public visual system in `.env.local`:
 
 ```dotenv
 SITE_THEME=coaching
+SITE_VISUAL_THEME=common-room
 ```
 
-Supported values:
+Institution values:
 
 - `school` — formal blue school and college theme
 - `madrasha` — restrained green, gold, and Arabic-influenced theme
@@ -223,7 +229,15 @@ Supported values:
 
 The archived coaching prototype directory retains its original `prototypes/coacing` spelling, but the recommended environment value is `coaching`. The misspelled `coacing` value is also accepted as a compatibility alias.
 
-Theme resolution is centralized in `src/config/site-theme.ts`. The root layout renders a `data-theme` attribute before the page reaches the browser, preventing a flash of the default theme. `src/app/themes.css` contains isolated theme overrides while routes, components, authentication, and workflows stay shared.
+Visual layout values:
+
+- `heritage` - the original v1 institutional layout
+- `fieldbook` - the sharp editorial v2 layout
+- `night-school` - the dark sidebar v3 application layout
+- `common-room` - the soft, rounded v4 campus portal
+- `ledger` - the minimal, information-first v5 layout
+
+Aliases `v1` through `v5` are accepted, but named values are preferred. Institution resolution is centralized in `src/config/site-theme.ts`; visual layout resolution lives in `src/config/site-visual-theme.ts`. The root layout renders both `data-theme` and `data-visual-theme` before the page reaches the browser, preventing a flash of a fallback theme. `src/app/themes.css` owns institution tokens and `src/app/visual-themes.css` owns layout composition. Routes, content, authentication, admin UI, and publishing workflows stay shared.
 
 Restart the development server after changing the theme. Production deployments must be rebuilt.
 
@@ -423,10 +437,11 @@ Admin editing journeys run in the desktop workspace. Public and authentication j
 
 ## Deployment
 
-The maintained school-theme deployment runs at
-[schoolcanvas.netlify.app](https://schoolcanvas.netlify.app). The repository has
-no provider-specific deployment file, so deploy another instance on a Node.js
-host that supports Next.js 16, then configure:
+Public demos run at [schoolcanvas.netlify.app](https://schoolcanvas.netlify.app),
+[madrashacanvas.netlify.app](https://madrashacanvas.netlify.app), and
+[coachingcanvasn.netlify.app](https://coachingcanvasn.netlify.app). The
+repository has no provider-specific deployment file, so deploy another instance
+on a Node.js host that supports Next.js 16, then configure:
 
 1. `SITE_URL` and `BETTER_AUTH_URL` to the same canonical HTTPS origin.
 2. The production Google OAuth callback at
@@ -434,7 +449,7 @@ host that supports Next.js 16, then configure:
 3. MongoDB, Google Drive, and Resend credentials for the workflows you enable.
 4. `ADMIN_EMAILS` before launch if administration must be restricted to named
    accounts.
-5. `SITE_THEME`, followed by a fresh production build.
+5. `SITE_THEME` and `SITE_VISUAL_THEME`, followed by a fresh production build.
 
 Run `pnpm lint`, `pnpm typecheck`, `pnpm build`, and the relevant Playwright
 journeys before promoting a deployment.
@@ -451,8 +466,9 @@ journeys before promoting a deployment.
 - Admission enquiries are stored before email delivery is attempted. Operators
   should define retention, access, and deletion policies for guardian contact
   details.
-- Changing `SITE_THEME` selects a different content document and requires a
-  rebuild; it does not convert an existing institution into a multi-tenant app.
+- Changing `SITE_THEME` selects a different content document, while
+  `SITE_VISUAL_THEME` changes its public layout. Either change requires a
+  rebuild; neither converts an existing institution into a multi-tenant app.
 - Notices, results, staff profiles, and admission copy are maintained by the
   deploying institution. EduCanvas does not independently verify them.
 
@@ -460,9 +476,9 @@ journeys before promoting a deployment.
 
 The original static prototypes remain available for reference:
 
-- `prototypes/school/` — Shapla Grove School & College
-- `prototypes/madrasha/` — Noorul Ilm Madrasha & Islamic Academy
-- `prototypes/coacing/` — Vertex Coaching Academy
+- `prototypes/school/v1-v5/` — Shapla Grove School & College
+- `prototypes/madrasha/v1-v5/` — Noorul Ilm Madrasha & Islamic Academy
+- `prototypes/coacing/v1-v5/` — Vertex Coaching Academy
 
 These files are historical references. The maintained application lives under `src/`.
 
