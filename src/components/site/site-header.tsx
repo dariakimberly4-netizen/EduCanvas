@@ -14,12 +14,13 @@ interface SiteHeaderProps {
 
 export function SiteHeader({ active }: SiteHeaderProps) {
   const { landing } = useSchoolContent().content;
-  const navigation: { label: string; href: string; page?: ActivePage }[] = [
-    { label: landing.navigationLabels.home, href: "/", page: "home" },
-    { label: landing.navigationLabels.school, href: "/#school" },
-    { label: landing.navigationLabels.academics, href: "/#academics" },
-    { label: landing.navigationLabels.faculty, href: "/faculty", page: "faculty" },
-    { label: landing.navigationLabels.notices, href: "/notices", page: "notices" },
+  const navigation = [
+    { label: "Home", href: "/", page: "home" as ActivePage },
+    { label: "Our School", href: "/#school" },
+    { label: "Academics", href: "/#academics" },
+    { label: "Campus Life", href: "/#campus-life" },
+    { label: "News", href: "/#news" },
+    { label: "Portal", href: "/admin" },
   ];
 
   return (
@@ -30,7 +31,7 @@ export function SiteHeader({ active }: SiteHeaderProps) {
           <p>{landing.utilityHours}</p>
           <div>
             <Link href={`tel:${landing.phone.replaceAll(" ", "")}`}>{landing.phone}</Link>
-            <Link href="/admin">{landing.staffLoginLabel}</Link>
+            <Link href="/admin">School portal</Link>
           </div>
         </div>
       </div>
@@ -52,7 +53,7 @@ export function SiteHeader({ active }: SiteHeaderProps) {
                 {item.label}
               </Link>
             ))}
-            <Link className="nav-cta" href="/#admissions">{landing.navigationLabels.admissions}</Link>
+            <Link className="nav-cta" href="/#admissions">Admissions</Link>
           </nav>
         </div>
       </header>
