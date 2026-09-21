@@ -23,6 +23,7 @@ import "@fontsource/ibm-plex-mono/latin-600.css";
 import "./globals.css";
 import "./themes.css";
 import "./visual-themes.css";
+import "./theresian.css";
 
 import { activeSiteTheme } from "@/config/site-theme";
 import { activeSiteVisualTheme } from "@/config/site-visual-theme";
