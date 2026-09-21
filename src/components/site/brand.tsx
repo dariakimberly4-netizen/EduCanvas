@@ -12,8 +12,8 @@ interface BrandProps {
 export function Brand({
   light = false,
   admin = false,
-  name = "Shapla Grove",
-  tagline = "School & College · Est. 1998",
+  name = "Theresian School of Cavite",
+  tagline = "Where Holistic Formation Begins",
 }: BrandProps) {
   return (
     <Link
@@ -21,10 +21,10 @@ export function Brand({
       href="/"
       aria-label={`${name} home`}
     >
-      <span className="brand-mark" aria-hidden="true">শ</span>
+      <span className="brand-mark" aria-hidden="true">TSC</span>
       <span>
         <strong>{name}</strong>
-        <small>{admin ? "Website management" : tagline}</small>
+        <small>{admin ? "School portal" : tagline}</small>
       </span>
     </Link>
   );
