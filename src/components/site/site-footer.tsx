@@ -16,20 +16,20 @@ export function SiteFooter() {
           <p>{landing.footerSummary}</p>
         </div>
         <div>
-          <h2>{landing.footerExploreHeading}</h2>
-          <Link href="/#school">{landing.navigationLabels.school}</Link>
-          <Link href="/#academics">{landing.navigationLabels.academics}</Link>
-          <Link href="/faculty">{landing.navigationLabels.faculty}</Link>
-          <Link href="/#admissions">{landing.navigationLabels.admissions}</Link>
+          <h2>Explore</h2>
+          <Link href="/#school">Our School</Link>
+          <Link href="/#academics">Academics</Link>
+          <Link href="/#campus-life">Campus Life</Link>
+          <Link href="/#admissions">Admissions</Link>
         </div>
         <div>
-          <h2>{landing.footerFamiliesHeading}</h2>
-          <Link href="/notices">{landing.navigationLabels.notices}</Link>
-          <Link href="/notices#results">{landing.footerResultsLabel}</Link>
-          <Link href="/admin">{landing.staffLoginLabel}</Link>
+          <h2>For families</h2>
+          <Link href="/#news">News & Updates</Link>
+          <Link href="/#contact">Visit & Contact</Link>
+          <Link href="/admin">School Portal</Link>
         </div>
         <address>
-          <h2>{landing.footerContactHeading}</h2>
+          <h2>Contact</h2>
           {landing.addressLineOne}<br />
           {landing.addressLineTwo}
           <Link href={`tel:${landing.phone.replaceAll(" ", "")}`}>{landing.phone}</Link>
