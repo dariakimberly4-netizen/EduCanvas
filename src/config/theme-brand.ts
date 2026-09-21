@@ -11,12 +11,12 @@ interface ThemeBrand {
 
 export const THEME_BRAND: Record<SiteThemeId, ThemeBrand> = {
   school: {
-    primary: "#1f5f8b",
-    deep: "#0a1f33",
-    pale: "#eaf3f8",
-    accent: "#f2b84b",
-    monogram: "SG",
-    previewLabel: "School & College",
+    primary: "#0b5a3d",
+    deep: "#08291f",
+    pale: "#edf5ef",
+    accent: "#c9a227",
+    monogram: "TSC",
+    previewLabel: "Where Holistic Formation Begins",
   },
   madrasha: {
     primary: "#176b51",
