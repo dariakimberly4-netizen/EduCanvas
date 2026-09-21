@@ -5,7 +5,7 @@ import { activeSiteTheme } from "@/config/site-theme";
 import { THEME_BRAND } from "@/config/theme-brand";
 
 export const alt =
-  "Shapla Grove School & College — a complete education from Playgroup to Class XII";
+  "Theresian School of Cavite — Where Holistic Formation Begins";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -50,10 +50,10 @@ export default function OpenGraphImage() {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              borderRadius: activeSiteTheme === "madrasha" ? "38px 38px 10px 10px" : 10,
+              borderRadius: 38,
               background: brand.primary,
               border: `2px solid ${brand.accent}`,
-              fontSize: 27,
+              fontSize: 23,
               fontWeight: 700,
               letterSpacing: -1,
             }}
@@ -68,7 +68,7 @@ export default function OpenGraphImage() {
               style={{
                 display: "flex",
                 marginTop: 7,
-                color: "#b9cbd7",
+                color: "#e0d59a",
                 fontSize: 14,
                 fontWeight: 600,
                 letterSpacing: 2.2,
@@ -82,16 +82,16 @@ export default function OpenGraphImage() {
 
         <div
           style={{
-            maxWidth: 820,
+            maxWidth: 850,
             display: "flex",
             marginTop: 66,
-            fontSize: 62,
+            fontSize: 64,
             fontWeight: 700,
-            lineHeight: 1.08,
+            lineHeight: 1.05,
             letterSpacing: -2.5,
           }}
         >
-          A complete education, built around every learner.
+          Where Holistic Formation Begins.
         </div>
 
         <div
@@ -100,7 +100,7 @@ export default function OpenGraphImage() {
             alignItems: "center",
             gap: 15,
             marginTop: "auto",
-            color: "#d9e5eb",
+            color: "#d9e8df",
             fontSize: 20,
           }}
         >
@@ -112,7 +112,7 @@ export default function OpenGraphImage() {
               background: brand.accent,
             }}
           />
-          Playgroup to Class XII · Dhanmondi, Dhaka
+          Pre-School to Senior High School · Bacoor, Cavite
         </div>
       </div>
 
@@ -126,7 +126,7 @@ export default function OpenGraphImage() {
           display: "flex",
           border: `1px solid ${brand.primary}`,
           borderRadius: "50%",
-          opacity: .6,
+          opacity: .7,
         }}
       />
       <div
@@ -139,7 +139,7 @@ export default function OpenGraphImage() {
           display: "flex",
           border: `1px solid ${brand.accent}`,
           borderRadius: "50%",
-          opacity: .38,
+          opacity: .45,
         }}
       />
     </div>,
